@@ -1,8 +1,12 @@
 import { SectionHeading } from "@/components/section-heading";
 import { ToolCard } from "@/components/tool-card";
-import { tools } from "@/lib/demo-data";
+import { getTools } from "@/lib/data";
 
-export default function ToolsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ToolsPage() {
+  const tools = await getTools();
+
   return (
     <section>
       <SectionHeading eyebrow="Katalog" title="AI nastroje" />

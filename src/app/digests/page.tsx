@@ -1,7 +1,11 @@
 import { SectionHeading } from "@/components/section-heading";
-import { digests } from "@/lib/demo-data";
+import { getDigests } from "@/lib/data";
 
-export default function DigestsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DigestsPage() {
+  const digests = await getDigests();
+
   return (
     <section>
       <SectionHeading eyebrow="Archiv" title="Denni digesty" />

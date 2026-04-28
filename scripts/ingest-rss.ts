@@ -1,3 +1,5 @@
+import "./load-env";
+
 import Parser from "rss-parser";
 import { createClient } from "@supabase/supabase-js";
 

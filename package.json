@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "ingest:rss": "tsx scripts/ingest-rss.ts"
+    "ingest:rss": "tsx scripts/ingest-rss.ts",
+    "ai:process": "tsx scripts/process-ai.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",

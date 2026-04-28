@@ -2,10 +2,14 @@ import { ExternalLink } from "lucide-react";
 
 import { SectionHeading } from "@/components/section-heading";
 import { TopicBadge } from "@/components/topic-badge";
+import { getSources } from "@/lib/data";
 import { trustLabel } from "@/lib/format";
-import { sources } from "@/lib/demo-data";
 
-export default function SourcesPage() {
+export const dynamic = "force-dynamic";
+
+export default async function SourcesPage() {
+  const sources = await getSources();
+
   return (
     <section>
       <SectionHeading eyebrow="Monitoring" title="Zdrojova mapa" />

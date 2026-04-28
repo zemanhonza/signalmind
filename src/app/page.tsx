@@ -12,10 +12,19 @@ import { MetricCard } from "@/components/metric-card";
 import { NewsCard } from "@/components/news-card";
 import { SectionHeading } from "@/components/section-heading";
 import { ToolCard } from "@/components/tool-card";
-import { digests, newsItems, sources, tools, topicStats } from "@/lib/demo-data";
+import { getDashboardData } from "@/lib/data";
 
-export default function Home() {
-  const activeSources = sources.filter((source) => source.status === "active");
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const {
+    activeSourceCount,
+    digests,
+    news,
+    tools,
+    topicStats,
+    topScore,
+  } = await getDashboardData();
   const topDigest = digests[0];
 
   return (
@@ -23,15 +32,15 @@ export default function Home() {
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Zdroje"
-          value={String(activeSources.length)}
-          detail="Primarni laboratore, vyzkum, medicina, vzdelavani a expertni blogy."
+          value={String(activeSourceCount)}
+          detail="Aktivni zdroje v Supabase napric laboratoremi, vyzkumem, medicinou a vzdelavanim."
           icon={Database}
           accent="bg-[#dff6ea] text-[#145238]"
         />
         <MetricCard
           label="Nove polozky"
-          value="69"
-          detail="Demo soucet za poslednich 24 hodin pred napojenim skutecneho ingestu."
+          value={String(news.length)}
+          detail="Nejcerstvejsi polozky nactene z RSS a ulozene v databazi."
           icon={Newspaper}
           accent="bg-[#e8eefc] text-[#243d7a]"
         />
@@ -44,8 +53,8 @@ export default function Home() {
         />
         <MetricCard
           label="Prioritni signal"
-          value="94"
-          detail="Skore kombinuje duveryhodnost zdroje, novost, oblast a prakticky dopad."
+          value={String(topScore)}
+          detail="Skore bude postupne doplnovat AI zpracovani a kuratorska pravidla."
           icon={Sparkles}
           accent="bg-[#fff0bd] text-[#684900]"
         />
@@ -130,7 +139,7 @@ export default function Home() {
           }
         />
         <div className="grid gap-4">
-          {newsItems.map((item) => (
+          {news.map((item) => (
             <NewsCard key={item.id} item={item} />
           ))}
         </div>

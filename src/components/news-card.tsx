@@ -13,6 +13,7 @@ export function NewsCard({ item }: { item: NewsItem }) {
           <span className="rounded-lg bg-[#f0f2ef] px-2.5 py-1 text-xs font-medium text-[#59645e]">
             {item.source}
           </span>
+          <span className="text-xs text-[#68716c]">{item.publishedAt}</span>
           <span className="text-xs text-[#68716c]">{item.readTime}</span>
         </div>
         <div className="flex items-center gap-2 text-sm font-semibold text-[#145238]">
@@ -45,12 +46,12 @@ export function NewsCard({ item }: { item: NewsItem }) {
           ))}
         </div>
         <a
-          href={item.sourceUrl}
+          href={item.url ?? item.sourceUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 text-sm font-semibold text-[#0d6b57] hover:underline"
         >
-          Zdroj
+          Otevrit
           <ExternalLink size={15} />
         </a>
       </div>

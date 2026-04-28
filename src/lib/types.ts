@@ -25,6 +25,7 @@ export type Source = {
 export type NewsItem = {
   id: string;
   title: string;
+  url?: string;
   source: string;
   sourceUrl: string;
   publishedAt: string;

@@ -27,6 +27,7 @@ Useful scripts:
 - `npm run typecheck` runs TypeScript checks.
 - `npm run build` creates a production build.
 - `npm run ingest:rss -- --limit=10` loads recent RSS items from active sources.
+- `npm run ai:process -- --limit=5` summarizes and scores new items with Anthropic.
 
 ## Configuration
 

@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 
 import { NewsCard } from "@/components/news-card";
 import { SectionHeading } from "@/components/section-heading";
-import { newsItems } from "@/lib/demo-data";
+import { getRecentNews } from "@/lib/data";
 
 const queries = [
   "AI v radiologii za posledni mesic",
@@ -11,7 +11,11 @@ const queries = [
   "regulace AI zdravotnickych prostredku",
 ];
 
-export default function SearchPage() {
+export const dynamic = "force-dynamic";
+
+export default async function SearchPage() {
+  const newsItems = await getRecentNews(8);
+
   return (
     <section className="grid gap-6">
       <SectionHeading eyebrow="Semantic search" title="Vyhledavani v archivu" />

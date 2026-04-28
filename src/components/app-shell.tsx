@@ -3,6 +3,7 @@ import {
   Archive,
   BookOpen,
   Brain,
+  Bot,
   Database,
   FileText,
   LayoutDashboard,
@@ -14,6 +15,7 @@ import {
 const navItems = [
   { href: "/", label: "Prehled", icon: LayoutDashboard },
   { href: "/digests", label: "Digesty", icon: FileText },
+  { href: "/ai", label: "AI shrnuti", icon: Bot },
   { href: "/tools", label: "Nastroje", icon: Wrench },
   { href: "/sources", label: "Zdroje", icon: Database },
   { href: "/search", label: "Vyhledavani", icon: Search },
@@ -54,7 +56,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="mt-8 border-t border-white/10 pt-6">
             <div className="flex items-center gap-3 text-sm text-[#d7ebe5]">
               <Archive size={18} />
-              <span>Archiv: 0 realnych polozek</span>
+              <span>Archiv: Supabase</span>
             </div>
             <div className="mt-3 flex items-center gap-3 text-sm text-[#d7ebe5]">
               <BookOpen size={18} />

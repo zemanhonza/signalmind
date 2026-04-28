@@ -28,6 +28,12 @@ Signalmind is a personal AI intelligence system. The first production target is 
 - Extract mentioned tools
 - Generate embeddings for article chunks
 
+Current first-pass command:
+
+- `npm run ai:process -- --limit=5`
+
+The initial AI pass uses Anthropic Messages API with `claude-haiku-4-5-20251001` by default. It writes Czech summaries into `item_summaries`, updates `items.score`, updates `items.topic`, marks processed items as `summarized`, and stores generated tags.
+
 ## Phase 4: Retrieval
 
 - Hybrid search: SQL filters plus vector similarity
