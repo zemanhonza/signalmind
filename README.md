@@ -32,6 +32,7 @@ Useful scripts:
 Copy `.env.example` to `.env.local` and add Supabase credentials when the database is ready.
 
 The initial database schema is in `supabase/migrations/0001_initial_schema.sql`.
+The initial curated source list is in `supabase/seed_sources.sql`.
 
 ## Plan
 

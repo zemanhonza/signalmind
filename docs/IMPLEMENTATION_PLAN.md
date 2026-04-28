@@ -14,6 +14,7 @@ Signalmind is a personal AI intelligence system. The first production target is 
 ## Phase 2: Data Ingest
 
 - Seed 30-50 curated sources
+- Store the source seed in `supabase/seed_sources.sql`
 - RSS ingestion with duplicate detection
 - Store source metadata and canonical URLs
 - Extract clean article text where available

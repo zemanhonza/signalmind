@@ -1,0 +1,57 @@
+insert into public.sources
+  (slug, name, homepage_url, feed_url, tier, topic, cadence, trust_score, status)
+values
+  ('openai-news', 'OpenAI News', 'https://openai.com/news/', 'https://openai.com/news/rss.xml', 'primary', 'AI obecne', 'frequent', 96, 'active'),
+  ('anthropic-news', 'Anthropic Newsroom', 'https://www.anthropic.com/news', null, 'primary', 'AI obecne', 'frequent', 95, 'active'),
+  ('google-deepmind', 'Google DeepMind Blog', 'https://deepmind.google/blog/', 'https://deepmind.google/blog/rss.xml', 'primary', 'Vyzkum', 'weekly', 95, 'active'),
+  ('google-ai', 'Google AI Blog', 'https://blog.google/technology/ai/', null, 'primary', 'AI obecne', 'weekly', 91, 'active'),
+  ('meta-ai', 'Meta AI Blog', 'https://ai.meta.com/blog/', null, 'primary', 'Vyzkum', 'weekly', 90, 'active'),
+  ('microsoft-research', 'Microsoft Research Blog', 'https://www.microsoft.com/en-us/research/blog/', 'https://www.microsoft.com/en-us/research/feed/', 'primary', 'Vyzkum', 'weekly', 90, 'active'),
+  ('hugging-face-blog', 'Hugging Face Blog', 'https://huggingface.co/blog', 'https://huggingface.co/blog/feed.xml', 'primary', 'Nastroje', 'frequent', 88, 'active'),
+  ('mistral-ai-news', 'Mistral AI News', 'https://mistral.ai/news', null, 'primary', 'AI obecne', 'periodic', 87, 'active'),
+  ('nvidia-ai-blog', 'NVIDIA AI Blog', 'https://blogs.nvidia.com/blog/category/deep-learning/', 'https://blogs.nvidia.com/blog/category/deep-learning/feed/', 'primary', 'Nastroje', 'frequent', 86, 'active'),
+  ('langchain-blog', 'LangChain Blog', 'https://www.langchain.com/blog', 'https://blog.langchain.com/rss/', 'tools', 'Nastroje', 'frequent', 84, 'active'),
+
+  ('arxiv-cs-ai', 'arXiv cs.AI', 'https://arxiv.org/list/cs.AI/recent', 'https://rss.arxiv.org/rss/cs.AI', 'research', 'Vyzkum', 'daily', 89, 'active'),
+  ('arxiv-cs-cl', 'arXiv cs.CL', 'https://arxiv.org/list/cs.CL/recent', 'https://rss.arxiv.org/rss/cs.CL', 'research', 'Vyzkum', 'daily', 89, 'active'),
+  ('arxiv-cs-lg', 'arXiv cs.LG', 'https://arxiv.org/list/cs.LG/recent', 'https://rss.arxiv.org/rss/cs.LG', 'research', 'Vyzkum', 'daily', 88, 'active'),
+  ('bair-blog', 'BAIR Blog', 'https://bair.berkeley.edu/blog/', 'https://bair.berkeley.edu/blog/feed.xml', 'research', 'Vyzkum', 'biweekly', 91, 'active'),
+  ('mit-csail-news', 'MIT CSAIL News', 'https://www.csail.mit.edu/news', null, 'research', 'Vyzkum', 'weekly', 88, 'active'),
+  ('allen-ai-news', 'Ai2 News', 'https://allenai.org/news', null, 'research', 'Vyzkum', 'weekly', 88, 'active'),
+  ('stanford-hai', 'Stanford HAI', 'https://hai.stanford.edu/news', null, 'research', 'Regulace', 'weekly', 89, 'active'),
+  ('epoch-ai', 'Epoch AI', 'https://epoch.ai/', 'https://epoch.ai/feed.xml', 'research', 'Vyzkum', 'monthly', 87, 'active'),
+  ('metr', 'METR', 'https://metr.org/', 'https://metr.org/blog/feed.xml', 'research', 'Bezpecnost', 'periodic', 89, 'active'),
+
+  ('fda-ai-devices', 'FDA AI-enabled Medical Devices', 'https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-and-machine-learning-aiml-enabled-medical-devices', null, 'sector', 'Medicina', 'periodic', 98, 'active'),
+  ('nejm-ai', 'NEJM AI', 'https://ai.nejm.org/', null, 'sector', 'Medicina', 'monthly', 94, 'active'),
+  ('lancet-digital-health', 'The Lancet Digital Health', 'https://www.thelancet.com/journals/landig/home', null, 'sector', 'Medicina', 'weekly', 93, 'active'),
+  ('nature-medicine', 'Nature Medicine', 'https://www.nature.com/nm/', 'https://www.nature.com/nm.rss', 'sector', 'Medicina', 'weekly', 93, 'active'),
+  ('jama-network-open', 'JAMA Network Open', 'https://jamanetwork.com/journals/jamanetworkopen', null, 'sector', 'Medicina', 'weekly', 91, 'active'),
+  ('healthcare-it-news', 'Healthcare IT News', 'https://www.healthcareitnews.com/', 'https://www.healthcareitnews.com/home/feed', 'sector', 'Medicina', 'frequent', 78, 'review'),
+
+  ('educause-review', 'EDUCAUSE Review', 'https://er.educause.edu/', 'https://er.educause.edu/rss', 'sector', 'Vzdelavani', 'weekly', 84, 'active'),
+  ('edsurge', 'EdSurge', 'https://www.edsurge.com/', 'https://www.edsurge.com/articles_rss', 'sector', 'Vzdelavani', 'frequent', 80, 'active'),
+  ('digital-promise', 'Digital Promise', 'https://digitalpromise.org/', 'https://digitalpromise.org/feed/', 'sector', 'Vzdelavani', 'weekly', 78, 'active'),
+  ('oecd-ai', 'OECD AI Policy Observatory', 'https://oecd.ai/', null, 'sector', 'Regulace', 'weekly', 86, 'active'),
+  ('unesco-ai', 'UNESCO AI', 'https://www.unesco.org/en/artificial-intelligence', null, 'sector', 'Regulace', 'periodic', 85, 'active'),
+
+  ('simon-willison', 'Simon Willison', 'https://simonwillison.net/', 'https://simonwillison.net/atom/everything/', 'expert', 'Nastroje', 'frequent', 88, 'active'),
+  ('ahead-of-ai', 'Ahead of AI', 'https://magazine.sebastianraschka.com/', null, 'expert', 'Vyzkum', 'weekly', 88, 'active'),
+  ('karpathy-blog', 'Andrej Karpathy', 'https://karpathy.github.io/', null, 'expert', 'Vzdelavani', 'periodic', 86, 'active'),
+  ('lilian-weng', 'Lilian Weng', 'https://lilianweng.github.io/', 'https://lilianweng.github.io/index.xml', 'expert', 'Vyzkum', 'periodic', 89, 'active'),
+  ('chip-huyen', 'Chip Huyen', 'https://huyenchip.com/blog/', 'https://huyenchip.com/feed.xml', 'expert', 'Nastroje', 'periodic', 86, 'active'),
+  ('eugene-yan', 'Eugene Yan', 'https://eugeneyan.com/', 'https://eugeneyan.com/rss/', 'expert', 'Nastroje', 'periodic', 85, 'active'),
+  ('jay-alammar', 'Jay Alammar', 'https://jalammar.github.io/', 'https://jalammar.github.io/feed.xml', 'expert', 'Vzdelavani', 'periodic', 84, 'active'),
+  ('import-ai', 'Import AI', 'https://jack-clark.net/', 'https://jack-clark.net/feed/', 'expert', 'AI obecne', 'weekly', 84, 'active'),
+  ('the-batch', 'The Batch', 'https://www.deeplearning.ai/the-batch/', null, 'expert', 'AI obecne', 'weekly', 82, 'active'),
+  ('latent-space', 'Latent Space', 'https://www.latent.space/', null, 'expert', 'Nastroje', 'weekly', 82, 'review')
+on conflict (slug) do update set
+  name = excluded.name,
+  homepage_url = excluded.homepage_url,
+  feed_url = excluded.feed_url,
+  tier = excluded.tier,
+  topic = excluded.topic,
+  cadence = excluded.cadence,
+  trust_score = excluded.trust_score,
+  status = excluded.status,
+  updated_at = now();
