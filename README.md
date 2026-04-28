@@ -26,6 +26,7 @@ Useful scripts:
 - `npm run lint` runs ESLint.
 - `npm run typecheck` runs TypeScript checks.
 - `npm run build` creates a production build.
+- `npm run ingest:rss -- --limit=10` loads recent RSS items from active sources.
 
 ## Configuration
 
