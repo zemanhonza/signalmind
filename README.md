@@ -43,3 +43,5 @@ See `docs/IMPLEMENTATION_PLAN.md`.
 ## Deployment
 
 The intended low-cost setup is Vercel Hobby for the frontend, Supabase Free for Postgres/pgvector, and GitHub Actions for scheduled ingest jobs.
+
+See `docs/DEPLOYMENT.md`.

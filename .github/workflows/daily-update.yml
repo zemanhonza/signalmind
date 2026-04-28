@@ -1,0 +1,70 @@
+name: Daily Signalmind Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      rss_limit:
+        description: Number of RSS sources to ingest
+        required: false
+        default: "15"
+      ai_limit:
+        description: Number of new items to summarize and score
+        required: false
+        default: "8"
+  schedule:
+    # 05:30 UTC is 07:30 in Prague during summer time and 06:30 during winter time.
+    - cron: "30 5 * * *"
+
+concurrency:
+  group: daily-signalmind-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Ingest and process AI news
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+      DEFAULT_RSS_LIMIT: ${{ vars.RSS_LIMIT }}
+      DEFAULT_AI_LIMIT: ${{ vars.AI_LIMIT }}
+      DISABLE_TELEMETRY: 1
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: RSS ingest
+        shell: bash
+        run: |
+          RSS_LIMIT="${{ inputs.rss_limit }}"
+          RSS_LIMIT="${RSS_LIMIT:-${DEFAULT_RSS_LIMIT:-15}}"
+          npm run ingest:rss -- --limit="$RSS_LIMIT"
+
+      - name: AI summarize and score
+        shell: bash
+        run: |
+          AI_LIMIT="${{ inputs.ai_limit }}"
+          AI_LIMIT="${AI_LIMIT:-${DEFAULT_AI_LIMIT:-8}}"
+          npm run ai:process -- --limit="$AI_LIMIT"

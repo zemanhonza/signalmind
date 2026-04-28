@@ -48,6 +48,12 @@ The initial AI pass uses Anthropic Messages API with `claude-haiku-4-5-20251001`
 - GitHub Actions scheduled workflow for morning updates
 - Hard limits for AI processing cost
 
+Current automation:
+
+- `.github/workflows/daily-update.yml`
+- Daily schedule: `05:30 UTC`
+- Defaults: `RSS_LIMIT=15`, `AI_LIMIT=8`
+
 ## Initial Source Groups
 
 - Primary labs: OpenAI, Anthropic, Google DeepMind, Google AI, Meta AI, Microsoft Research, Hugging Face, Mistral, Cohere, NVIDIA
