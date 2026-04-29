@@ -11,6 +11,10 @@ on:
         description: Number of new items to summarize and score
         required: false
         default: "5"
+      embedding_limit:
+        description: Number of summarized items to embed for semantic search
+        required: false
+        default: "10"
   schedule:
     # 05:30 UTC is 07:30 in Prague during summer time and 06:30 during winter time.
     - cron: "30 5 * * *"
@@ -30,10 +34,14 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+      EMBEDDING_MODEL: ${{ vars.EMBEDDING_MODEL }}
       DEFAULT_RSS_LIMIT: ${{ vars.RSS_LIMIT }}
       DEFAULT_AI_LIMIT: ${{ vars.AI_LIMIT }}
+      DEFAULT_EMBEDDING_LIMIT: ${{ vars.EMBEDDING_LIMIT }}
       AI_REQUEST_TIMEOUT_MS: ${{ vars.AI_REQUEST_TIMEOUT_MS }}
+      EMBEDDING_REQUEST_TIMEOUT_MS: ${{ vars.EMBEDDING_REQUEST_TIMEOUT_MS }}
       DISABLE_TELEMETRY: 1
       NEXT_TELEMETRY_DISABLED: 1
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -75,3 +83,15 @@ jobs:
           AI_LIMIT="${{ inputs.ai_limit }}"
           AI_LIMIT="${AI_LIMIT:-${DEFAULT_AI_LIMIT:-5}}"
           npm run ai:process -- --limit="$AI_LIMIT"
+
+      - name: Vector embeddings
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY is not configured; skipping embeddings."
+            exit 0
+          fi
+          EMBEDDING_LIMIT="${{ inputs.embedding_limit }}"
+          EMBEDDING_LIMIT="${EMBEDDING_LIMIT:-${DEFAULT_EMBEDDING_LIMIT:-10}}"
+          npm run embeddings:process -- --limit="$EMBEDDING_LIMIT"

@@ -31,10 +31,13 @@ Signalmind is a personal AI intelligence system. The first production target is 
 Current first-pass command:
 
 - `npm run ai:process -- --limit=5`
+- `npm run embeddings:process -- --limit=10`
 
 The initial AI pass uses Anthropic Messages API with `claude-haiku-4-5-20251001` by default. It writes Czech summaries into `item_summaries`, updates `items.score`, updates `items.topic`, marks processed items as `summarized`, and stores generated tags.
 
 The second migration adds `item_summaries.title_cs` so the UI can display Czech article titles while retaining the original source title in `items.title`.
+
+The third migration updates `match_item_chunks` for public semantic search. Embeddings use `text-embedding-3-small` by default and are stored in `item_chunks.embedding` as 1536-dimensional vectors.
 
 ## Phase 4: Retrieval
 
@@ -54,8 +57,9 @@ Current automation:
 
 - `.github/workflows/daily-update.yml`
 - Daily schedule: `05:30 UTC`
-- Defaults: `RSS_LIMIT=10`, `AI_LIMIT=5`
+- Defaults: `RSS_LIMIT=10`, `AI_LIMIT=5`, `EMBEDDING_LIMIT=10`
 - Anthropic request timeout: `AI_REQUEST_TIMEOUT_MS=45000`
+- Embedding request timeout: `EMBEDDING_REQUEST_TIMEOUT_MS=45000`
 
 ## Initial Source Groups
 

@@ -47,6 +47,11 @@ export function NewsCard({ item }: { item: NewsItem }) {
       <p className="mt-3 max-w-4xl border-l-2 border-[#37b981] pl-3 text-sm leading-6 text-[#40524b]">
         {item.whyItMatters}
       </p>
+      {item.semanticSnippet ? (
+        <p className="mt-3 max-w-4xl rounded-lg bg-[#f6f7f4] px-3 py-2 text-sm leading-6 text-[#40524b]">
+          Nalezeno v kontextu: {item.semanticSnippet}
+        </p>
+      ) : null}
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">

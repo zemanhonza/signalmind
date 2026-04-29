@@ -6,6 +6,7 @@ import {
   sources as demoSources,
   tools as demoTools,
 } from "./demo-data";
+import { createEmbedding, hasEmbeddingApiKey } from "./embeddings";
 import type {
   Digest,
   NewsItem,
@@ -74,6 +75,15 @@ type DigestRow = {
   body_cs: string;
 };
 
+type ChunkMatchRow = {
+  item_id: string;
+  chunk_id: string;
+  title: string;
+  canonical_url: string;
+  content: string;
+  similarity: number;
+};
+
 export type NewsArchiveFilters = {
   query?: string;
   topic?: Topic | "all";
@@ -90,6 +100,8 @@ export type NewsArchiveResult = {
   page: number;
   pageSize: number;
   totalPages: number;
+  mode?: "semantic" | "text";
+  message?: string;
 };
 
 export type ToolFilters = {
@@ -213,6 +225,24 @@ function estimateReadTime(text: string) {
 function truncateText(value: string, maxLength: number) {
   if (value.length <= maxLength) return value;
   return `${value.slice(0, maxLength - 1).trim()}...`;
+}
+
+function excerptAroundQuery(content: string, query: string, maxLength = 260) {
+  const normalizedContent = content.replace(/\s+/g, " ").trim();
+  if (normalizedContent.length <= maxLength) return normalizedContent;
+
+  const terms = query
+    .toLocaleLowerCase("cs-CZ")
+    .split(/\s+/)
+    .filter((term) => term.length > 2);
+  const lower = normalizedContent.toLocaleLowerCase("cs-CZ");
+  const hit = terms
+    .map((term) => lower.indexOf(term))
+    .find((index) => index >= 0);
+  const start = Math.max(0, (hit ?? 0) - 80);
+  const snippet = normalizedContent.slice(start, start + maxLength).trim();
+
+  return `${start > 0 ? "... " : ""}${snippet}${start + maxLength < normalizedContent.length ? " ..." : ""}`;
 }
 
 function latestSummary(summaries: SummaryRow[] | null) {
@@ -361,6 +391,7 @@ export async function getNewsArchive(
       page,
       pageSize,
       totalPages: Math.max(1, Math.ceil(sorted.length / pageSize)),
+      mode: "text",
     };
   }
 
@@ -397,6 +428,7 @@ export async function getNewsArchive(
       page,
       pageSize,
       totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
+      mode: "text",
     };
   }
 
@@ -431,7 +463,123 @@ export async function getNewsArchive(
     page,
     pageSize,
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    mode: "text",
   };
+}
+
+export async function getSearchResults(query: string, limit = 10): Promise<NewsArchiveResult> {
+  const normalizedQuery = cleanSearchTerm(query);
+
+  if (!normalizedQuery) {
+    return {
+      items: await getRecentNews(limit),
+      total: 0,
+      page: 1,
+      pageSize: limit,
+      totalPages: 1,
+      mode: "text",
+    };
+  }
+
+  const supabase = getSupabaseClient();
+  const fallback = async (message?: string) => {
+    const archive = await getNewsArchive({
+      query: normalizedQuery,
+      status: "all",
+      pageSize: limit,
+    });
+
+    return {
+      ...archive,
+      mode: "text" as const,
+      message,
+    };
+  };
+
+  if (!supabase) {
+    return fallback("Supabase neni nakonfigurovany, pouzivam textove hledani v demo datech.");
+  }
+
+  if (!hasEmbeddingApiKey()) {
+    return fallback("Semantic search ceka na serverovy OPENAI_API_KEY.");
+  }
+
+  try {
+    const embedding = await createEmbedding(normalizedQuery);
+    const { data, error } = await supabase.rpc("match_item_chunks", {
+      query_embedding: embedding,
+      match_count: Math.min(limit * 3, 30),
+    });
+
+    if (error) {
+      return fallback(`Semantic search zatim neni aktivni: ${error.message}`);
+    }
+
+    const matches = ((data ?? []) as ChunkMatchRow[]).filter(
+      (match) => match.item_id && Number.isFinite(match.similarity),
+    );
+
+    if (matches.length === 0) {
+      return fallback("V archivu zatim nejsou ulozene embeddingy pro semanticke hledani.");
+    }
+
+    const bestByItem = new Map<string, ChunkMatchRow>();
+    for (const match of matches) {
+      const current = bestByItem.get(match.item_id);
+      if (!current || match.similarity > current.similarity) {
+        bestByItem.set(match.item_id, match);
+      }
+    }
+
+    const orderedIds = [...bestByItem.keys()].slice(0, limit);
+    const itemQueryWithTitle = await supabase
+      .from("items")
+      .select(itemSelectWithTitle)
+      .in("id", orderedIds);
+    let itemData: unknown = itemQueryWithTitle.data;
+    let itemError = itemQueryWithTitle.error;
+
+    if (itemError?.message.includes("title_cs")) {
+      const itemQueryLegacy = await supabase
+        .from("items")
+        .select(itemSelectLegacy)
+        .in("id", orderedIds);
+      itemData = itemQueryLegacy.data;
+      itemError = itemQueryLegacy.error;
+    }
+
+    if (itemError || !itemData) {
+      return fallback(`Nepodarilo se nacist vysledky semantic search: ${itemError?.message}`);
+    }
+
+    const rowsById = new Map(
+      (itemData as unknown as ItemRow[]).map((row) => [row.id, row]),
+    );
+    const items: NewsItem[] = [];
+    for (const id of orderedIds) {
+      const row = rowsById.get(id);
+      const match = bestByItem.get(id);
+      if (!row || !match) continue;
+
+      items.push({
+        ...newsFromRow(row),
+        similarity: match.similarity,
+        semanticSnippet: excerptAroundQuery(match.content, normalizedQuery),
+      });
+    }
+
+    return {
+      items,
+      total: bestByItem.size,
+      page: 1,
+      pageSize: limit,
+      totalPages: 1,
+      mode: "semantic",
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return fallback(`Semantic search spadl na chybe, pouzivam textove hledani: ${message}`);
+  }
 }
 
 export async function getItemCounts(): Promise<ItemCounts> {

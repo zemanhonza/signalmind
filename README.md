@@ -29,6 +29,7 @@ Useful scripts:
 - `npm run ingest:rss -- --limit=10` loads recent RSS items from active sources.
 - `npm run ai:process -- --limit=5` summarizes and scores new items with Anthropic.
 - `npm run ai:process -- --status=summarized --limit=3` refreshes already summarized items.
+- `npm run embeddings:process -- --limit=10` stores pgvector embeddings for summarized items.
 - `npm run seed:tools` fills the Supabase tool catalog with curated AI tools.
 
 ## Configuration
@@ -37,6 +38,7 @@ Copy `.env.example` to `.env.local` and add Supabase credentials when the databa
 
 The initial database schema is in `supabase/migrations/0001_initial_schema.sql`.
 The initial curated source list is in `supabase/seed_sources.sql`.
+Vector search updates are in `supabase/migrations/0003_vector_search.sql`.
 
 ## Plan
 

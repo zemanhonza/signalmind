@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "ingest:rss": "tsx scripts/ingest-rss.ts",
     "ai:process": "tsx scripts/process-ai.ts",
+    "embeddings:process": "tsx scripts/process-embeddings.ts",
     "seed:tools": "tsx scripts/seed-tools.ts"
   },
   "dependencies": {

@@ -38,6 +38,8 @@ export type NewsItem = {
   tags: string[];
   readTime: string;
   status?: NewsStatus;
+  similarity?: number;
+  semanticSnippet?: string;
 };
 
 export type ToolItem = {

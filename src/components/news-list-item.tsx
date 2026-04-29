@@ -45,6 +45,11 @@ export function NewsListItem({ item }: { item: NewsItem }) {
         <p className="mt-2 max-w-4xl text-sm leading-6 text-[#4f5d55]">
           {item.summary}
         </p>
+        {item.semanticSnippet ? (
+          <p className="mt-2 max-w-4xl rounded-lg bg-[#f6f7f4] px-3 py-2 text-sm leading-6 text-[#40524b]">
+            Nalezeno v kontextu: {item.semanticSnippet}
+          </p>
+        ) : null}
         <div className="mt-3 flex flex-wrap gap-2">
           {item.tags.map((tag) => (
             <span

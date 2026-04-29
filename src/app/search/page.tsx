@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 
 import { NewsCard } from "@/components/news-card";
 import { SectionHeading } from "@/components/section-heading";
-import { getNewsArchive, getRecentNews } from "@/lib/data";
+import { getRecentNews, getSearchResults } from "@/lib/data";
 
 const queries = [
   "AI v radiologii za posledni mesic",
@@ -25,9 +25,7 @@ function firstParam(value: string | string[] | undefined) {
 export default async function SearchPage({ searchParams }: PageProps) {
   const params = (await searchParams) ?? {};
   const q = firstParam(params.q) ?? "";
-  const results = q
-    ? await getNewsArchive({ query: q, status: "all", pageSize: 10 })
-    : null;
+  const results = q ? await getSearchResults(q, 10) : null;
   const newsItems = results?.items ?? (await getRecentNews(4));
 
   return (
@@ -61,9 +59,17 @@ export default async function SearchPage({ searchParams }: PageProps) {
         </div>
       </div>
       {q ? (
-        <p className="text-sm text-[#65716b]">
-          Nalezeno {results?.total ?? 0} vysledku pro dotaz &quot;{q}&quot;.
-        </p>
+        <div className="grid gap-2">
+          <p className="text-sm text-[#65716b]">
+            {results?.mode === "semantic" ? "Semanticke hledani" : "Textove hledani"} naslo{" "}
+            {results?.total ?? 0} vysledku pro dotaz &quot;{q}&quot;.
+          </p>
+          {results?.message ? (
+            <p className="rounded-lg border border-[#dfe4dd] bg-[#fffdf3] px-3 py-2 text-sm text-[#684900]">
+              {results.message}
+            </p>
+          ) : null}
+        </div>
       ) : null}
       <div className="grid gap-4">
         {newsItems.length > 0 ? (

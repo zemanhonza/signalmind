@@ -16,15 +16,19 @@ Add these in GitHub:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ANTHROPIC_API_KEY`
+- `OPENAI_API_KEY`
 
 Optional variables:
 
 `Settings` -> `Secrets and variables` -> `Actions` -> `Variables`
 
 - `ANTHROPIC_MODEL`: defaults to `claude-haiku-4-5-20251001` in the script
+- `EMBEDDING_MODEL`: defaults to `text-embedding-3-small`
 - `RSS_LIMIT`: default workflow value is `10`
 - `AI_LIMIT`: default workflow value is `5`
+- `EMBEDDING_LIMIT`: default workflow value is `10`
 - `AI_REQUEST_TIMEOUT_MS`: default script value is `45000`
+- `EMBEDDING_REQUEST_TIMEOUT_MS`: default script value is `45000`
 
 ## Daily Automation
 
@@ -52,8 +56,21 @@ Add these environment variables in Vercel:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `OPENAI_API_KEY`
 
-Do not add `SUPABASE_SERVICE_ROLE_KEY` or `ANTHROPIC_API_KEY` to Vercel unless a server-side feature needs them later. The current public app only needs read access.
+Do not add `SUPABASE_SERVICE_ROLE_KEY` or `ANTHROPIC_API_KEY` to Vercel unless a server-side feature needs them later. Semantic search needs `OPENAI_API_KEY` on Vercel, but it is server-side only and must not use the `NEXT_PUBLIC_` prefix.
+
+## Vector Search
+
+Run `supabase/migrations/0003_vector_search.sql` in Supabase SQL editor before enabling public semantic search. It updates the `match_item_chunks` RPC function so the app can search embeddings without exposing direct table write access.
+
+After adding `OPENAI_API_KEY`, generate embeddings manually with:
+
+```bash
+npm run embeddings:process -- --limit=20
+```
+
+The daily GitHub workflow also runs this step after AI summarization when `OPENAI_API_KEY` is configured.
 
 After the first deploy, Vercel will show a production URL. If the project name is available, it is usually:
 
