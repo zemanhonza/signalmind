@@ -36,9 +36,23 @@ if (!supabaseUrl || !serviceRoleKey) {
 
 const limitArg = process.argv.find((arg) => arg.startsWith("--limit="));
 const sourceLimit = limitArg ? Number(limitArg.split("=")[1]) : 10;
+const itemsPerSourceArg = process.argv.find((arg) =>
+  arg.startsWith("--items-per-source="),
+);
+const itemsPerSource = itemsPerSourceArg
+  ? Number(itemsPerSourceArg.split("=")[1])
+  : Number(process.env.RSS_ITEMS_PER_SOURCE || 20);
+const configuredTimeoutMs = Number(process.env.RSS_FETCH_TIMEOUT_MS);
+const fetchTimeoutMs =
+  Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0
+    ? configuredTimeoutMs
+    : 15000;
 
 const parser = new Parser({
-  timeout: 20000,
+  headers: {
+    "user-agent": "Signalmind RSS ingest/0.1",
+  },
+  timeout: fetchTimeoutMs,
 });
 
 const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -119,7 +133,7 @@ async function ingestSource(source: SourceRow) {
 
   const feed = await parser.parseURL(source.feed_url);
   const rows = feed.items
-    .slice(0, 20)
+    .slice(0, itemsPerSource)
     .map((item) => toInsert(source, item))
     .filter((row): row is ItemInsert => Boolean(row));
 
@@ -144,8 +158,11 @@ async function ingestSource(source: SourceRow) {
 }
 
 async function main() {
+  const startedAt = Date.now();
   const sources = await loadSources();
-  console.log(`Loaded ${sources.length} RSS sources.`);
+  console.log(
+    `Loaded ${sources.length} RSS sources; max ${itemsPerSource} items/source; timeout ${fetchTimeoutMs}ms.`,
+  );
 
   let insertedTotal = 0;
 
@@ -162,10 +179,15 @@ async function main() {
     }
   }
 
-  console.log(`Inserted ${insertedTotal} new items.`);
+  const elapsedSeconds = Math.round((Date.now() - startedAt) / 1000);
+  console.log(`Inserted ${insertedTotal} new items in ${elapsedSeconds}s.`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

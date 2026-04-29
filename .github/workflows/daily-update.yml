@@ -15,6 +15,10 @@ on:
         description: Number of summarized items to embed for semantic search
         required: false
         default: "10"
+      rss_items_per_source:
+        description: Number of feed items to inspect per RSS source
+        required: false
+        default: "20"
   schedule:
     # 05:30 UTC is 07:30 in Prague during summer time and 06:30 during winter time.
     - cron: "30 5 * * *"
@@ -38,8 +42,10 @@ jobs:
       ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
       EMBEDDING_MODEL: ${{ vars.EMBEDDING_MODEL }}
       DEFAULT_RSS_LIMIT: ${{ vars.RSS_LIMIT }}
+      DEFAULT_RSS_ITEMS_PER_SOURCE: ${{ vars.RSS_ITEMS_PER_SOURCE }}
       DEFAULT_AI_LIMIT: ${{ vars.AI_LIMIT }}
       DEFAULT_EMBEDDING_LIMIT: ${{ vars.EMBEDDING_LIMIT }}
+      RSS_FETCH_TIMEOUT_MS: ${{ vars.RSS_FETCH_TIMEOUT_MS }}
       AI_REQUEST_TIMEOUT_MS: ${{ vars.AI_REQUEST_TIMEOUT_MS }}
       EMBEDDING_REQUEST_TIMEOUT_MS: ${{ vars.EMBEDDING_REQUEST_TIMEOUT_MS }}
       DISABLE_TELEMETRY: 1
@@ -69,12 +75,14 @@ jobs:
         run: npm run lint
 
       - name: RSS ingest
-        timeout-minutes: 8
+        timeout-minutes: 15
         shell: bash
         run: |
           RSS_LIMIT="${{ inputs.rss_limit }}"
           RSS_LIMIT="${RSS_LIMIT:-${DEFAULT_RSS_LIMIT:-10}}"
-          npm run ingest:rss -- --limit="$RSS_LIMIT"
+          RSS_ITEMS_PER_SOURCE="${{ inputs.rss_items_per_source }}"
+          RSS_ITEMS_PER_SOURCE="${RSS_ITEMS_PER_SOURCE:-${DEFAULT_RSS_ITEMS_PER_SOURCE:-20}}"
+          npm run ingest:rss -- --limit="$RSS_LIMIT" --items-per-source="$RSS_ITEMS_PER_SOURCE"
 
       - name: AI summarize and score
         timeout-minutes: 18

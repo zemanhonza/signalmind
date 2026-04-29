@@ -25,6 +25,8 @@ Optional variables:
 - `ANTHROPIC_MODEL`: defaults to `claude-haiku-4-5-20251001` in the script
 - `EMBEDDING_MODEL`: defaults to `text-embedding-3-small`
 - `RSS_LIMIT`: default workflow value is `10`
+- `RSS_ITEMS_PER_SOURCE`: default workflow value is `20`
+- `RSS_FETCH_TIMEOUT_MS`: default script value is `15000`
 - `AI_LIMIT`: default workflow value is `5`
 - `EMBEDDING_LIMIT`: default workflow value is `10`
 - `AI_REQUEST_TIMEOUT_MS`: default script value is `45000`
