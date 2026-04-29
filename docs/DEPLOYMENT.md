@@ -38,6 +38,8 @@ You can also run it manually:
 
 For a first manual run, use small limits such as `rss_limit=5` and `ai_limit=3`. Larger backfills can be run later once the workflow is stable.
 
+If the UI is deployed before a database migration, run the pending SQL migration in Supabase first and then redeploy or rerun the workflow.
+
 ## Vercel
 
 Import the GitHub repository into Vercel:

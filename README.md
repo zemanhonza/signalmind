@@ -28,6 +28,7 @@ Useful scripts:
 - `npm run build` creates a production build.
 - `npm run ingest:rss -- --limit=10` loads recent RSS items from active sources.
 - `npm run ai:process -- --limit=5` summarizes and scores new items with Anthropic.
+- `npm run ai:process -- --status=summarized --limit=3` refreshes already summarized items.
 
 ## Configuration
 

@@ -1,6 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { digests as demoDigests, newsItems as demoNewsItems, sources as demoSources, tools as demoTools } from "./demo-data";
+import {
+  digests as demoDigests,
+  newsItems as demoNewsItems,
+  sources as demoSources,
+  tools as demoTools,
+} from "./demo-data";
 import type { Digest, NewsItem, Source, SourceStatus, SourceTier, ToolItem, Topic } from "./types";
 
 type SourceRow = {
@@ -17,6 +22,7 @@ type SourceRow = {
 };
 
 type SummaryRow = {
+  title_cs?: string | null;
   summary_short_cs: string | null;
   summary_long_cs: string | null;
   why_it_matters_cs: string | null;
@@ -71,6 +77,10 @@ const topics: Topic[] = [
 
 const sourceTiers: SourceTier[] = ["primary", "research", "expert", "sector", "tools"];
 const sourceStatuses: SourceStatus[] = ["active", "review", "paused"];
+const itemSelectWithTitle =
+  "id, title, canonical_url, published_at, topic, score, raw_excerpt, status, sources(name, homepage_url), item_summaries(title_cs, summary_short_cs, summary_long_cs, why_it_matters_cs, key_points_cs, created_at)";
+const itemSelectLegacy =
+  "id, title, canonical_url, published_at, topic, score, raw_excerpt, status, sources(name, homepage_url), item_summaries(summary_short_cs, summary_long_cs, why_it_matters_cs, key_points_cs, created_at)";
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -117,6 +127,11 @@ function estimateReadTime(text: string) {
   return `${minutes} min`;
 }
 
+function truncateText(value: string, maxLength: number) {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength - 1).trim()}...`;
+}
+
 function latestSummary(summaries: SummaryRow[] | null) {
   return [...(summaries ?? [])].sort((a, b) =>
     b.created_at.localeCompare(a.created_at),
@@ -140,23 +155,22 @@ function newsFromRow(row: ItemRow): NewsItem {
   const summary = latestSummary(row.item_summaries);
   const summaryText =
     summary?.summary_short_cs ??
-    row.raw_excerpt ??
-    "Zatim bez AI shrnuti. Polozka je nactena ze zdroje a ceka na zpracovani.";
+    "Ceka na ceske AI shrnuti. Polozka je uz ulozena v archivu a bude zpracovana v dalsi davce.";
   const whyItMatters =
     summary?.why_it_matters_cs ??
-    "Dulezitost bude doplnena po AI zpracovani a rucni kontrole relevance.";
+    "Dulezitost doplni AI zpracovani po vyhodnoceni zdroje, tematu a praktickeho dopadu.";
 
   return {
     id: row.id,
-    title: row.title,
+    title: summary?.title_cs ?? row.title,
     url: row.canonical_url,
     source: row.sources?.name ?? "Neznamy zdroj",
     sourceUrl: row.sources?.homepage_url ?? row.canonical_url,
     publishedAt: formatDate(row.published_at),
     topic: normalizeTopic(row.topic),
     score: row.score ?? 0,
-    summary: summaryText,
-    whyItMatters,
+    summary: truncateText(summaryText, 230),
+    whyItMatters: truncateText(whyItMatters, 190),
     tags: summary?.key_points_cs?.slice(0, 3) ?? [row.status],
     readTime: estimateReadTime(summaryText),
   };
@@ -206,17 +220,42 @@ export async function getRecentNews(limit = 20) {
   const supabase = getSupabaseClient();
   if (!supabase) return demoNewsItems.slice(0, limit);
 
-  const { data, error } = await supabase
+  const summarized = await supabase
     .from("items")
-    .select(
-      "id, title, canonical_url, published_at, topic, score, raw_excerpt, status, sources(name, homepage_url), item_summaries(summary_short_cs, summary_long_cs, why_it_matters_cs, key_points_cs, created_at)",
-    )
-    .neq("status", "hidden")
+    .select(itemSelectWithTitle)
+    .eq("status", "summarized")
+    .order("score", { ascending: false })
     .order("published_at", { ascending: false })
     .limit(limit);
 
-  if (error || !data) return demoNewsItems.slice(0, limit);
-  return (data as unknown as ItemRow[]).map(newsFromRow);
+  const summarizedData =
+    summarized.error && summarized.error.message.includes("title_cs")
+      ? await supabase
+          .from("items")
+          .select(itemSelectLegacy)
+          .eq("status", "summarized")
+          .order("score", { ascending: false })
+          .order("published_at", { ascending: false })
+          .limit(limit)
+      : summarized;
+
+  if (summarizedData.error || !summarizedData.data) {
+    return demoNewsItems.slice(0, limit);
+  }
+
+  const news = (summarizedData.data as unknown as ItemRow[]).map(newsFromRow);
+  if (news.length >= Math.min(limit, 3)) return news.slice(0, limit);
+
+  const remaining = limit - news.length;
+  const queued = await supabase
+    .from("items")
+    .select(itemSelectLegacy)
+    .eq("status", "new")
+    .order("published_at", { ascending: false })
+    .limit(remaining);
+
+  if (queued.error || !queued.data) return news;
+  return [...news, ...(queued.data as unknown as ItemRow[]).map(newsFromRow)];
 }
 
 export async function getTools() {

@@ -34,6 +34,8 @@ Current first-pass command:
 
 The initial AI pass uses Anthropic Messages API with `claude-haiku-4-5-20251001` by default. It writes Czech summaries into `item_summaries`, updates `items.score`, updates `items.topic`, marks processed items as `summarized`, and stores generated tags.
 
+The second migration adds `item_summaries.title_cs` so the UI can display Czech article titles while retaining the original source title in `items.title`.
+
 ## Phase 4: Retrieval
 
 - Hybrid search: SQL filters plus vector similarity

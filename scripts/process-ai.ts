@@ -14,6 +14,7 @@ const TopicSchema = z.enum([
 ]);
 
 const AiResultSchema = z.object({
+  title_cs: z.string().min(8).max(120),
   summary_short_cs: z.string().min(20),
   summary_long_cs: z.string().min(20).optional(),
   why_it_matters_cs: z.string().min(20),
@@ -60,6 +61,8 @@ const anthropicApiKey = anthropicKey;
 
 const limitArg = process.argv.find((arg) => arg.startsWith("--limit="));
 const itemLimit = limitArg ? Number(limitArg.split("=")[1]) : 5;
+const statusArg = process.argv.find((arg) => arg.startsWith("--status="));
+const itemStatus = statusArg ? statusArg.split("=")[1] : "new";
 const configuredTimeoutMs = Number(process.env.AI_REQUEST_TIMEOUT_MS);
 const requestTimeoutMs =
   Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0
@@ -98,10 +101,11 @@ Zpracuj nasledujici AI novinku pro cesky znalostni system Signalmind.
 
 Vrat pouze validni JSON bez Markdownu a bez komentare ve tvaru:
 {
-  "summary_short_cs": "2-3 vety cesky",
-  "summary_long_cs": "4-6 vet cesky",
-  "why_it_matters_cs": "proc je to dulezite pro praxi/vyzkum/medicinu/vzdelavani",
-  "key_points_cs": ["bod 1", "bod 2", "bod 3"],
+  "title_cs": "kratky cesky titulek do 90 znaku",
+  "summary_short_cs": "1 kratka veta cesky, maximalne 180 znaku",
+  "summary_long_cs": "2 kratke vety cesky, maximalne 320 znaku",
+  "why_it_matters_cs": "1 kratka veta cesky, maximalne 160 znaku",
+  "key_points_cs": ["2-4slovny bod", "2-4slovny bod", "2-4slovny bod"],
   "topic": "AI obecne | Medicina | Vzdelavani | Vyzkum | Nastroje | Regulace | Bezpecnost",
   "score": 0-100,
   "tags": ["kratky tag", "kratky tag"]
@@ -128,7 +132,7 @@ async function loadItems() {
     .select(
       "id, title, canonical_url, raw_excerpt, topic, published_at, sources(name, trust_score, tier)",
     )
-    .eq("status", "new")
+    .eq("status", itemStatus)
     .order("published_at", { ascending: false })
     .limit(itemLimit);
 
@@ -150,7 +154,7 @@ async function summarizeWithClaude(item: ItemRow) {
     },
     body: JSON.stringify({
       model,
-      max_tokens: 900,
+      max_tokens: 550,
       temperature: 0.2,
       system:
         "Jsi analytik AI novinek. Vracis pouze validni JSON podle zadaneho schematu. Pises cesky, vecne a bez marketingoveho hype.",
@@ -201,15 +205,33 @@ async function attachTags(itemId: string, tags: string[]) {
 
 async function processItem(item: ItemRow) {
   const result = await summarizeWithClaude(item);
-
-  const { error: summaryError } = await supabase.from("item_summaries").insert({
+  const summaryPayload = {
     item_id: item.id,
+    title_cs: result.title_cs,
     summary_short_cs: result.summary_short_cs,
     summary_long_cs: result.summary_long_cs ?? result.summary_short_cs,
     why_it_matters_cs: result.why_it_matters_cs,
     key_points_cs: result.key_points_cs,
     model_name: model,
-  });
+  };
+
+  let { error: summaryError } = await supabase
+    .from("item_summaries")
+    .insert(summaryPayload);
+
+  if (summaryError?.message.includes("title_cs")) {
+    const legacyResult = await supabase
+      .from("item_summaries")
+      .insert({
+        item_id: summaryPayload.item_id,
+        summary_short_cs: summaryPayload.summary_short_cs,
+        summary_long_cs: summaryPayload.summary_long_cs,
+        why_it_matters_cs: summaryPayload.why_it_matters_cs,
+        key_points_cs: summaryPayload.key_points_cs,
+        model_name: summaryPayload.model_name,
+      });
+    summaryError = legacyResult.error;
+  }
 
   if (summaryError) throw summaryError;
 
@@ -231,7 +253,7 @@ async function processItem(item: ItemRow) {
 
 async function main() {
   const items = await loadItems();
-  console.log(`Loaded ${items.length} items for AI processing.`);
+  console.log(`Loaded ${items.length} ${itemStatus} items for AI processing.`);
 
   let processed = 0;
 
