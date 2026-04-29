@@ -13,7 +13,8 @@
     "embeddings:process": "tsx scripts/process-embeddings.ts",
     "summary:generate": "tsx scripts/generate-digest.ts",
     "digest:generate": "tsx scripts/generate-digest.ts",
-    "seed:tools": "tsx scripts/seed-tools.ts"
+    "seed:tools": "tsx scripts/seed-tools.ts",
+    "tools:import-csv": "tsx scripts/import-tools-csv.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",

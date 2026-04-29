@@ -33,6 +33,9 @@ Useful scripts:
 - `npm run embeddings:process -- --limit=10` stores pgvector embeddings for summarized items.
 - `npm run summary:generate -- --limit=12` creates or updates the daily summary.
 - `npm run seed:tools` fills the Supabase tool catalog with curated AI tools.
+- `npm run tools:import-csv -- --file=./exports/tools.csv` imports an external CSV tool list.
+
+Tool imports are documented in `docs/TOOL_IMPORT.md`.
 
 ## Configuration
 
