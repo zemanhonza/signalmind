@@ -3,25 +3,24 @@ import {
   Archive,
   BookOpen,
   Brain,
-  Bot,
-  Database,
-  FileText,
-  LayoutDashboard,
-  Search,
   Settings2,
-  Wrench,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/", label: "Prehled", icon: LayoutDashboard },
-  { href: "/digests", label: "Digesty", icon: FileText },
-  { href: "/ai", label: "AI shrnuti", icon: Bot },
-  { href: "/tools", label: "Nastroje", icon: Wrench },
-  { href: "/sources", label: "Zdroje", icon: Database },
-  { href: "/search", label: "Vyhledavani", icon: Search },
-];
+import { MainNav } from "./main-nav";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const today = new Intl.DateTimeFormat("cs-CZ", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  }).format(new Date());
+  const hasSupabase =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    );
+
   return (
     <div className="min-h-screen bg-[#f6f7f4] text-[#1d211f]">
       <div className="mx-auto flex min-h-screen w-full max-w-[1500px] flex-col lg:flex-row">
@@ -35,23 +34,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 Signalmind
               </span>
               <span className="text-xs uppercase tracking-[0.18em] text-[#9fcabe]">
-                AI intelligence
+                AI prehled
               </span>
             </span>
           </Link>
 
-          <nav className="mt-8 grid gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#d7ebe5] transition hover:bg-white/10 hover:text-white"
-              >
-                <item.icon size={18} />
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <MainNav />
 
           <div className="mt-8 border-t border-white/10 pt-6">
             <div className="flex items-center gap-3 text-sm text-[#d7ebe5]">
@@ -60,11 +48,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="mt-3 flex items-center gap-3 text-sm text-[#d7ebe5]">
               <BookOpen size={18} />
-              <span>Demo rezim</span>
+              <span>{hasSupabase ? "Zivy archiv" : "Demo rezim"}</span>
             </div>
             <div className="mt-3 flex items-center gap-3 text-sm text-[#d7ebe5]">
               <Settings2 size={18} />
-              <span>Supabase pripraveno</span>
+              <span>{hasSupabase ? "Supabase aktivni" : "Supabase pripraveno"}</span>
             </div>
           </div>
         </aside>
@@ -81,10 +69,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
               <span className="rounded-lg border border-[#dfe4dd] bg-[#f6f7f4] px-3 py-2 text-[#40524b]">
-                28. 4. 2026
+                {today}
               </span>
               <span className="rounded-lg bg-[#ffe6a6] px-3 py-2 font-medium text-[#553b00]">
-                MVP build
+                Beta provoz
               </span>
             </div>
           </header>

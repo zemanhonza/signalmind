@@ -19,6 +19,7 @@ export default async function AiPage() {
           detail="Polozky ve stavu new, ktere jeste nemaji ceske shrnuti a skore."
           icon={Clock}
           accent="bg-[#fff0bd] text-[#684900]"
+          href="/news?status=new"
         />
         <MetricCard
           label="Shrnuto"
@@ -26,6 +27,7 @@ export default async function AiPage() {
           detail="Polozky, ktere prosly AI sumarizaci, tematickym zarazenim a scoringem."
           icon={Bot}
           accent="bg-[#dff6ea] text-[#145238]"
+          href="/news?status=summarized"
         />
         <MetricCard
           label="Top signal"
@@ -33,6 +35,7 @@ export default async function AiPage() {
           detail="Nejvyssi aktualni skore mezi poslednimi nactenymi polozkami."
           icon={Sparkles}
           accent="bg-[#e8eefc] text-[#243d7a]"
+          href="/news?sort=score"
         />
       </section>
 

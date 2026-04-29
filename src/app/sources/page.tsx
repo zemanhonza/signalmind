@@ -14,7 +14,7 @@ export default async function SourcesPage() {
     <section>
       <SectionHeading eyebrow="Monitoring" title="Zdrojova mapa" />
       <div className="overflow-hidden rounded-lg border border-[#dfe4dd] bg-white shadow-sm">
-        <div className="grid grid-cols-[1.4fr_0.8fr_0.7fr_0.6fr] gap-4 border-b border-[#dfe4dd] bg-[#f2f5f1] px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#65716b]">
+        <div className="hidden grid-cols-[1.4fr_0.8fr_0.7fr_0.6fr] gap-4 border-b border-[#dfe4dd] bg-[#f2f5f1] px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#65716b] md:grid">
           <span>Zdroj</span>
           <span>Tema</span>
           <span>Duv.</span>

@@ -5,16 +5,28 @@ import type { NewsItem } from "@/lib/types";
 import { TopicBadge } from "./topic-badge";
 
 export function NewsCard({ item }: { item: NewsItem }) {
+  const articleUrl = item.url ?? item.sourceUrl;
+
   return (
-    <article className="rounded-lg border border-[#dfe4dd] bg-white p-5 shadow-sm">
+    <article className="rounded-lg border border-[#dfe4dd] bg-white p-5 shadow-sm transition hover:border-[#c9d3cd]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <TopicBadge topic={item.topic} />
-          <span className="rounded-lg bg-[#f0f2ef] px-2.5 py-1 text-xs font-medium text-[#59645e]">
+          <a
+            href={item.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-lg bg-[#f0f2ef] px-2.5 py-1 text-xs font-medium text-[#59645e] hover:bg-[#e4e8e3] hover:text-[#1d211f]"
+          >
             {item.source}
-          </span>
+          </a>
           <span className="text-xs text-[#68716c]">{item.publishedAt}</span>
           <span className="text-xs text-[#68716c]">{item.readTime}</span>
+          {item.status === "new" ? (
+            <span className="rounded-lg bg-[#fff0bd] px-2.5 py-1 text-xs font-semibold text-[#684900]">
+              ceka na AI
+            </span>
+          ) : null}
         </div>
         <div className="flex items-center gap-2 text-sm font-semibold text-[#145238]">
           <span>{item.score}</span>
@@ -25,7 +37,9 @@ export function NewsCard({ item }: { item: NewsItem }) {
       </div>
 
       <h3 className="mt-4 max-w-3xl text-lg font-semibold leading-7 text-[#1d211f]">
-        {item.title}
+        <a href={articleUrl} target="_blank" rel="noreferrer" className="hover:underline">
+          {item.title}
+        </a>
       </h3>
       <p className="mt-3 max-w-4xl text-sm leading-6 text-[#4f5d55]">
         {item.summary}
@@ -46,7 +60,7 @@ export function NewsCard({ item }: { item: NewsItem }) {
           ))}
         </div>
         <a
-          href={item.url ?? item.sourceUrl}
+          href={articleUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 text-sm font-semibold text-[#0d6b57] hover:underline"

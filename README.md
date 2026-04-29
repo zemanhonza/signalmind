@@ -2,7 +2,7 @@
 
 Signalmind is a Next.js application for monitoring important AI developments across medicine, education, research, policy, and practical tools.
 
-The app currently contains a working dashboard shell with demo data and a Supabase-ready schema. The next step is wiring the ingest pipeline to real curated sources.
+The app contains a public dashboard, article archive, source map, AI processing overview, searchable news flow, and a filterable tool catalog backed by Supabase.
 
 ## Getting Started
 
@@ -29,6 +29,7 @@ Useful scripts:
 - `npm run ingest:rss -- --limit=10` loads recent RSS items from active sources.
 - `npm run ai:process -- --limit=5` summarizes and scores new items with Anthropic.
 - `npm run ai:process -- --status=summarized --limit=3` refreshes already summarized items.
+- `npm run seed:tools` fills the Supabase tool catalog with curated AI tools.
 
 ## Configuration
 

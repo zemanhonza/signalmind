@@ -11,6 +11,8 @@ export type SourceTier = "primary" | "research" | "expert" | "sector" | "tools";
 
 export type SourceStatus = "active" | "review" | "paused";
 
+export type NewsStatus = "new" | "summarized" | "archived" | "hidden";
+
 export type Source = {
   id: string;
   name: string;
@@ -35,6 +37,7 @@ export type NewsItem = {
   whyItMatters: string;
   tags: string[];
   readTime: string;
+  status?: NewsStatus;
 };
 
 export type ToolItem = {

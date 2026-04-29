@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 
 type MetricCardProps = {
@@ -6,6 +7,7 @@ type MetricCardProps = {
   detail: string;
   icon: LucideIcon;
   accent: string;
+  href?: string;
 };
 
 export function MetricCard({
@@ -14,9 +16,10 @@ export function MetricCard({
   detail,
   icon: Icon,
   accent,
+  href,
 }: MetricCardProps) {
-  return (
-    <div className="rounded-lg border border-[#dfe4dd] bg-white p-4 shadow-sm">
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-[#65716b]">{label}</p>
@@ -27,6 +30,23 @@ export function MetricCard({
         </span>
       </div>
       <p className="mt-3 text-sm leading-6 text-[#65716b]">{detail}</p>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="block rounded-lg border border-[#dfe4dd] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#b9c7bf] hover:shadow-md"
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-[#dfe4dd] bg-white p-4 shadow-sm">
+      {content}
     </div>
   );
 }

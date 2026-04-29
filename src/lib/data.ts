@@ -6,7 +6,16 @@ import {
   sources as demoSources,
   tools as demoTools,
 } from "./demo-data";
-import type { Digest, NewsItem, Source, SourceStatus, SourceTier, ToolItem, Topic } from "./types";
+import type {
+  Digest,
+  NewsItem,
+  NewsStatus,
+  Source,
+  SourceStatus,
+  SourceTier,
+  ToolItem,
+  Topic,
+} from "./types";
 
 type SourceRow = {
   id: string;
@@ -65,6 +74,37 @@ type DigestRow = {
   body_cs: string;
 };
 
+export type NewsArchiveFilters = {
+  query?: string;
+  topic?: Topic | "all";
+  status?: NewsStatus | "all";
+  sort?: "score" | "newest";
+  page?: number;
+  pageSize?: number;
+  minScore?: number;
+};
+
+export type NewsArchiveResult = {
+  items: NewsItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export type ToolFilters = {
+  query?: string;
+  category?: string;
+  pricing?: ToolItem["pricing"] | "all";
+  limit?: number;
+};
+
+export type ItemCounts = {
+  total: number;
+  queued: number;
+  summarized: number;
+};
+
 const topics: Topic[] = [
   "AI obecne",
   "Medicina",
@@ -75,8 +115,13 @@ const topics: Topic[] = [
   "Bezpecnost",
 ];
 
+export const topicOptions = topics;
+
 const sourceTiers: SourceTier[] = ["primary", "research", "expert", "sector", "tools"];
 const sourceStatuses: SourceStatus[] = ["active", "review", "paused"];
+const newsStatuses: NewsStatus[] = ["new", "summarized", "archived", "hidden"];
+const pricingOptions: ToolItem["pricing"][] = ["Free", "Freemium", "Paid", "Research", "Unknown"];
+export const toolPricingOptions = pricingOptions;
 const itemSelectWithTitle =
   "id, title, canonical_url, published_at, topic, score, raw_excerpt, status, sources(name, homepage_url), item_summaries(title_cs, summary_short_cs, summary_long_cs, why_it_matters_cs, key_points_cs, created_at)";
 const itemSelectLegacy =
@@ -110,6 +155,44 @@ function normalizeTier(value: string): SourceTier {
 function normalizeStatus(value: string): SourceStatus {
   if (sourceStatuses.includes(value as SourceStatus)) return value as SourceStatus;
   return "review";
+}
+
+function normalizeNewsStatus(value: string): NewsStatus {
+  if (newsStatuses.includes(value as NewsStatus)) return value as NewsStatus;
+  return "new";
+}
+
+function normalizePricing(value: string): ToolItem["pricing"] {
+  if (pricingOptions.includes(value as ToolItem["pricing"])) {
+    return value as ToolItem["pricing"];
+  }
+  return "Unknown";
+}
+
+function cleanSearchTerm(value: string | undefined) {
+  return (value ?? "")
+    .replace(/[,%(){}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80);
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function includesQuery(item: NewsItem | ToolItem, query: string) {
+  const haystack = Object.values(item)
+    .flat()
+    .join(" ")
+    .toLocaleLowerCase("cs-CZ");
+  const terms = query
+    .toLocaleLowerCase("cs-CZ")
+    .split(/\s+/)
+    .filter((term) => term.length > 2);
+
+  if (terms.length === 0) return haystack.includes(query.toLocaleLowerCase("cs-CZ"));
+  return terms.some((term) => haystack.includes(term));
 }
 
 function formatDate(value: string | null) {
@@ -173,6 +256,7 @@ function newsFromRow(row: ItemRow): NewsItem {
     whyItMatters: truncateText(whyItMatters, 190),
     tags: summary?.key_points_cs?.slice(0, 3) ?? [row.status],
     readTime: estimateReadTime(summaryText),
+    status: normalizeNewsStatus(row.status),
   };
 }
 
@@ -182,7 +266,7 @@ function toolFromRow(row: ToolRow): ToolItem {
     name: row.name,
     url: row.homepage_url,
     category: row.category,
-    pricing: row.pricing as ToolItem["pricing"],
+    pricing: normalizePricing(row.pricing),
     summary: row.summary_cs ?? "Zatim bez popisu.",
     useCase: row.use_case_cs ?? "Use-case bude doplnen po kuraci.",
     signal: row.signal_score,
@@ -243,32 +327,168 @@ export async function getRecentNews(limit = 20) {
     return demoNewsItems.slice(0, limit);
   }
 
-  const news = (summarizedData.data as unknown as ItemRow[]).map(newsFromRow);
-  if (news.length >= Math.min(limit, 3)) return news.slice(0, limit);
-
-  const remaining = limit - news.length;
-  const queued = await supabase
-    .from("items")
-    .select(itemSelectLegacy)
-    .eq("status", "new")
-    .order("published_at", { ascending: false })
-    .limit(remaining);
-
-  if (queued.error || !queued.data) return news;
-  return [...news, ...(queued.data as unknown as ItemRow[]).map(newsFromRow)];
+  return (summarizedData.data as unknown as ItemRow[]).map(newsFromRow);
 }
 
-export async function getTools() {
+export async function getNewsArchive(
+  filters: NewsArchiveFilters = {},
+): Promise<NewsArchiveResult> {
   const supabase = getSupabaseClient();
-  if (!supabase) return demoTools;
+  const pageSize = clamp(filters.pageSize ?? 20, 6, 48);
+  const page = Math.max(1, filters.page ?? 1);
+  const status = filters.status ?? "summarized";
+  const sort = filters.sort ?? "newest";
+  const query = cleanSearchTerm(filters.query);
+  const topic = filters.topic && filters.topic !== "all" ? filters.topic : undefined;
+  const minScore = filters.minScore ? clamp(filters.minScore, 0, 100) : undefined;
+
+  if (!supabase) {
+    const filtered = demoNewsItems.filter((item) => {
+      if (topic && item.topic !== topic) return false;
+      if (minScore && item.score < minScore) return false;
+      if (query && !includesQuery(item, query)) return false;
+      return true;
+    });
+
+    const sorted = filtered.sort((a, b) =>
+      sort === "score" ? b.score - a.score : b.publishedAt.localeCompare(a.publishedAt),
+    );
+    const from = (page - 1) * pageSize;
+
+    return {
+      items: sorted.slice(from, from + pageSize),
+      total: sorted.length,
+      page,
+      pageSize,
+      totalPages: Math.max(1, Math.ceil(sorted.length / pageSize)),
+    };
+  }
+
+  if (query) {
+    let candidates = supabase.from("items").select(itemSelectWithTitle);
+    if (status !== "all") candidates = candidates.eq("status", status);
+    if (topic) candidates = candidates.eq("topic", topic);
+    if (minScore !== undefined) candidates = candidates.gte("score", minScore);
+
+    if (sort === "score") {
+      candidates = candidates
+        .order("score", { ascending: false })
+        .order("published_at", { ascending: false });
+    } else {
+      candidates = candidates
+        .order("published_at", { ascending: false })
+        .order("score", { ascending: false });
+    }
+
+    const { data, error } = await candidates.limit(300);
+
+    if (error || !data) {
+      return { items: [], total: 0, page, pageSize, totalPages: 1 };
+    }
+
+    const filtered = (data as unknown as ItemRow[])
+      .map(newsFromRow)
+      .filter((item) => includesQuery(item, query));
+    const from = (page - 1) * pageSize;
+
+    return {
+      items: filtered.slice(from, from + pageSize),
+      total: filtered.length,
+      page,
+      pageSize,
+      totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
+    };
+  }
+
+  const from = (page - 1) * pageSize;
+  let request = supabase.from("items").select(itemSelectWithTitle, { count: "exact" });
+  if (status !== "all") request = request.eq("status", status);
+  if (topic) request = request.eq("topic", topic);
+  if (minScore !== undefined) request = request.gte("score", minScore);
+
+  if (sort === "score") {
+    request = request
+      .order("score", { ascending: false })
+      .order("published_at", { ascending: false });
+  } else {
+    request = request
+      .order("published_at", { ascending: false })
+      .order("score", { ascending: false });
+  }
+
+  request = request.range(from, from + pageSize - 1);
+  const { data, error, count } = await request;
+
+  if (error || !data) {
+    return { items: [], total: 0, page, pageSize, totalPages: 1 };
+  }
+
+  const total = count ?? data.length;
+
+  return {
+    items: (data as unknown as ItemRow[]).map(newsFromRow),
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  };
+}
+
+export async function getItemCounts(): Promise<ItemCounts> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return {
+      total: demoNewsItems.length,
+      queued: 0,
+      summarized: demoNewsItems.length,
+    };
+  }
+
+  const [total, queued, summarized] = await Promise.all([
+    supabase.from("items").select("id", { count: "exact", head: true }),
+    supabase.from("items").select("id", { count: "exact", head: true }).eq("status", "new"),
+    supabase
+      .from("items")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "summarized"),
+  ]);
+
+  return {
+    total: total.count ?? 0,
+    queued: queued.count ?? 0,
+    summarized: summarized.count ?? 0,
+  };
+}
+
+function filterTools(items: ToolItem[], filters: ToolFilters) {
+  const query = cleanSearchTerm(filters.query);
+
+  return items.filter((tool) => {
+    if (filters.category && filters.category !== "all" && tool.category !== filters.category) {
+      return false;
+    }
+
+    if (filters.pricing && filters.pricing !== "all" && tool.pricing !== filters.pricing) {
+      return false;
+    }
+
+    if (query && !includesQuery(tool, query)) return false;
+
+    return true;
+  });
+}
+
+export async function getTools(filters: ToolFilters = {}) {
+  const supabase = getSupabaseClient();
+  if (!supabase) return filterTools(demoTools, filters).slice(0, filters.limit);
 
   const { data, error } = await supabase
     .from("tools")
     .select("id, name, homepage_url, category, pricing, summary_cs, use_case_cs, signal_score")
     .order("signal_score", { ascending: false });
 
-  if (error || !data || data.length === 0) return demoTools;
-  return (data as ToolRow[]).map(toolFromRow);
+  const rows = error || !data || data.length === 0 ? demoTools : (data as ToolRow[]).map(toolFromRow);
+  return filterTools(rows, filters).slice(0, filters.limit);
 }
 
 export async function getDigests() {
@@ -286,11 +506,12 @@ export async function getDigests() {
 }
 
 export async function getDashboardData() {
-  const [sources, news, tools, digests] = await Promise.all([
+  const [sources, news, tools, digests, itemCounts] = await Promise.all([
     getSources(),
     getRecentNews(12),
     getTools(),
     getDigests(),
+    getItemCounts(),
   ]);
 
   const topicCounts = news.reduce<Record<string, number>>((acc, item) => {
@@ -313,6 +534,7 @@ export async function getDashboardData() {
     tools,
     digests,
     topicStats,
+    itemCounts,
     activeSourceCount: sources.filter((source) => source.status === "active").length,
     topScore: news.reduce((max, item) => Math.max(max, item.score), 0),
   };

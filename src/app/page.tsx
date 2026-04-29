@@ -20,6 +20,7 @@ export default async function Home() {
   const {
     activeSourceCount,
     digests,
+    itemCounts,
     news,
     tools,
     topicStats,
@@ -36,13 +37,15 @@ export default async function Home() {
           detail="Aktivni zdroje v Supabase napric laboratoremi, vyzkumem, medicinou a vzdelavanim."
           icon={Database}
           accent="bg-[#dff6ea] text-[#145238]"
+          href="/sources"
         />
         <MetricCard
-          label="Nove polozky"
-          value={String(news.length)}
-          detail="Nejcerstvejsi polozky nactene z RSS a ulozene v databazi."
+          label="Archiv clanku"
+          value={String(itemCounts.total)}
+          detail={`${itemCounts.summarized} zpracovano AI, ${itemCounts.queued} ceka na ceske shrnuti.`}
           icon={Newspaper}
           accent="bg-[#e8eefc] text-[#243d7a]"
+          href="/news"
         />
         <MetricCard
           label="AI nastroje"
@@ -50,6 +53,7 @@ export default async function Home() {
           detail="Katalog bude ukladat cenu, pouziti, kategorii a souvisejici odkazy."
           icon={Wrench}
           accent="bg-[#dff5fb] text-[#0d5264]"
+          href="/tools"
         />
         <MetricCard
           label="Prioritni signal"
@@ -57,6 +61,7 @@ export default async function Home() {
           detail="Skore bude postupne doplnovat AI zpracovani a kuratorska pravidla."
           icon={Sparkles}
           accent="bg-[#fff0bd] text-[#684900]"
+          href="/ai"
         />
       </section>
 
@@ -107,7 +112,7 @@ export default async function Home() {
           </div>
           <div className="mt-5 grid gap-4">
             {topicStats.map((topic) => (
-              <div key={topic.label}>
+              <Link key={topic.label} href={`/news?topic=${encodeURIComponent(topic.label)}`}>
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="font-medium text-[#40524b]">{topic.label}</span>
                   <span className="text-[#65716b]">{topic.value}</span>
@@ -118,7 +123,7 @@ export default async function Home() {
                     style={{ width: `${Math.min(topic.value * 3, 100)}%` }}
                   />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -129,19 +134,31 @@ export default async function Home() {
           eyebrow="Kuratorovany proud"
           title="Nejdulezitejsi signaly"
           action={
-            <Link
-              href="/search"
-              className="inline-flex items-center gap-2 rounded-lg border border-[#dfe4dd] bg-white px-3 py-2 text-sm font-semibold text-[#0d6b57] hover:bg-[#f2f7f4]"
-            >
-              Vyhledat souvislosti
-              <ScanSearch size={16} />
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/news"
+                className="rounded-lg border border-[#dfe4dd] bg-white px-3 py-2 text-sm font-semibold text-[#0d6b57] hover:bg-[#f2f7f4]"
+              >
+                Vsechny clanky
+              </Link>
+              <Link
+                href="/search"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#dfe4dd] bg-white px-3 py-2 text-sm font-semibold text-[#0d6b57] hover:bg-[#f2f7f4]"
+              >
+                Vyhledat souvislosti
+                <ScanSearch size={16} />
+              </Link>
+            </div>
           }
         />
         <div className="grid gap-4">
-          {news.map((item) => (
-            <NewsCard key={item.id} item={item} />
-          ))}
+          {news.length > 0 ? (
+            news.map((item) => <NewsCard key={item.id} item={item} />)
+          ) : (
+            <div className="rounded-lg border border-[#dfe4dd] bg-white p-5 text-sm text-[#65716b]">
+              Zatim nejsou k dispozici AI zpracovane clanky.
+            </div>
+          )}
         </div>
       </section>
 
