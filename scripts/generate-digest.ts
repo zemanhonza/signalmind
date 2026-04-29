@@ -137,6 +137,7 @@ Vrat pouze validni JSON bez Markdownu ve tvaru:
 
 Pravidla:
 - Pis cesky, vecne a bez hype.
+- Nepouzivej slovo "digest"; pouzij "souhrn" nebo "denni souhrn".
 - Vyber nejdulezitejsi vzorce napric zdroji, ne jen prepis titulku.
 - Body zacinaji tematickou znackou jako Medicina:, Vzdelavani:, Nastroje:, Vyzkum:, Regulace:.
 - Maximalne 8 bodu.

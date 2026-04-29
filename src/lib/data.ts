@@ -190,6 +190,12 @@ function cleanSearchTerm(value: string | undefined) {
     .slice(0, 80);
 }
 
+function normalizeSummaryTerminology(value: string) {
+  return value
+    .replace(/\b(Denn(?:i|\u00ed))\s+digest\b/gi, "$1 souhrn")
+    .replace(/\bdigest\b/gi, "souhrn");
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
@@ -338,12 +344,13 @@ function digestFromRow(row: DigestRow): Digest {
   return {
     id: row.id,
     date: formatDate(row.digest_date),
-    title: row.title_cs,
-    focus: row.focus_cs ?? "souhrn dne",
+    title: normalizeSummaryTerminology(row.title_cs),
+    focus: normalizeSummaryTerminology(row.focus_cs ?? "souhrn dne"),
     items: row.body_cs
       .split("\n")
       .map((line) => line.trim())
-      .filter(Boolean),
+      .filter(Boolean)
+      .map(normalizeSummaryTerminology),
   };
 }
 

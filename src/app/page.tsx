@@ -78,7 +78,7 @@ export default async function Home() {
               <p className="mt-2 text-sm text-[#65716b]">{topDigest.focus}</p>
             </div>
             <Link
-              href="/digests"
+              href="/souhrny"
               className="inline-flex items-center gap-2 rounded-lg border border-[#dfe4dd] px-3 py-2 text-sm font-semibold text-[#0d6b57] hover:bg-[#f2f7f4]"
             >
               Archiv
