@@ -6,7 +6,7 @@ Signalmind is a personal AI intelligence system. The first production target is 
 
 - Next.js App Router dashboard
 - Source map
-- Daily digest archive
+- Daily summary archive
 - Tool catalog
 - Semantic search screen
 - Supabase schema and environment template
@@ -32,7 +32,7 @@ Current first-pass command:
 
 - `npm run ai:process -- --limit=5`
 - `npm run embeddings:process -- --limit=10`
-- `npm run digest:generate -- --limit=12`
+- `npm run summary:generate -- --limit=12`
 
 The initial AI pass uses Anthropic Messages API with `claude-haiku-4-5-20251001` by default. It writes Czech summaries into `item_summaries`, updates `items.score`, updates `items.topic`, marks processed items as `summarized`, and stores generated tags.
 
@@ -47,7 +47,7 @@ The fourth migration adds vector-based related article lookup for article detail
 - Hybrid search: SQL filters plus vector similarity
 - Related articles on detail pages
 - Saved searches for medicine, education, tools, and policy
-- Digest generation from top-scored items
+- Daily summary generation from top-scored items
 
 ## Phase 5: Deployment
 

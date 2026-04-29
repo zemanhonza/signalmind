@@ -11,8 +11,8 @@ on:
         description: Number of summarized items to embed
         required: false
         default: "50"
-      digest_limit:
-        description: Number of top summarized items to use for digest
+      summary_limit:
+        description: Number of top summarized items to use for daily summary
         required: false
         default: "12"
 
@@ -80,9 +80,9 @@ jobs:
           EMBEDDING_LIMIT="${{ inputs.embedding_limit }}"
           npm run embeddings:process -- --limit="${EMBEDDING_LIMIT:-50}"
 
-      - name: Generate daily digest
+      - name: Generate daily summary
         timeout-minutes: 8
         shell: bash
         run: |
-          DIGEST_LIMIT="${{ inputs.digest_limit }}"
-          npm run digest:generate -- --limit="${DIGEST_LIMIT:-12}"
+          SUMMARY_LIMIT="${{ inputs.summary_limit }}"
+          npm run summary:generate -- --limit="${SUMMARY_LIMIT:-12}"

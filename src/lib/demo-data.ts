@@ -160,7 +160,7 @@ export const newsItems: NewsItem[] = [
     summary:
       "Evaluace dlouhych autonomnich uloh ukazuji, ze prakticka schopnost AI agentu se neda vystihnout jednim skore v testu. Dulezite je, jak dlouhy a rozvetveny ukol model zvladne bez dohledu.",
     whyItMatters:
-      "Signalizuje posun od chatovacich modelu k pracovnim systemum, ktere bude treba sledovat v medicinske administraci, vyuce i vyzkumu.",
+      "Ukazuje posun od chatovacich modelu k pracovnim systemum, ktere bude treba sledovat v medicinske administraci, vyuce i vyzkumu.",
     tags: ["frontier AI", "agents", "benchmarks"],
     readTime: "7 min",
   },
@@ -225,7 +225,7 @@ export const digests: Digest[] = [
   {
     id: "2026-04-27",
     date: "27. 4. 2026",
-    title: "Vyssi signal u zdroju s primarnimi daty",
+    title: "Vyssi relevance u zdroju s primarnimi daty",
     focus: "FDA, arXiv, Stanford HAI, expertni blogy",
     items: [
       "Prioritizovat primarni zdroje pred medialnimi prepisy.",

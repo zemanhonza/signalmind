@@ -16,7 +16,7 @@ export default async function AiPage() {
         <MetricCard
           label="Ceka na AI"
           value={String(overview.queuedCount)}
-          detail="Polozky ve stavu new, ktere jeste nemaji ceske shrnuti a skore."
+          detail="Polozky ve stavu new, ktere jeste nemaji ceske shrnuti a skore relevance."
           icon={Clock}
           accent="bg-[#fff0bd] text-[#684900]"
           href="/news?status=new"
@@ -24,15 +24,15 @@ export default async function AiPage() {
         <MetricCard
           label="Shrnuto"
           value={String(overview.summarizedCount)}
-          detail="Polozky, ktere prosly AI sumarizaci, tematickym zarazenim a scoringem."
+          detail="Polozky, ktere prosly AI sumarizaci, tematickym zarazenim a hodnocenim relevance."
           icon={Bot}
           accent="bg-[#dff6ea] text-[#145238]"
           href="/news?status=summarized"
         />
         <MetricCard
-          label="Top signal"
+          label="Top relevance"
           value={String(overview.topScored[0]?.score ?? 0)}
-          detail="Nejvyssi aktualni skore mezi poslednimi nactenymi polozkami."
+          detail="Nejvyssi aktualni skore relevance mezi poslednimi nactenymi polozkami."
           icon={Sparkles}
           accent="bg-[#e8eefc] text-[#243d7a]"
           href="/news?sort=score"
@@ -42,7 +42,7 @@ export default async function AiPage() {
       <section>
         <SectionHeading
           eyebrow="AI kurace"
-          title="Nejvyssi skore a posledni shrnuti"
+          title="Nejvyssi relevance a posledni shrnuti"
         />
         <div className="grid gap-4">
           {overview.topScored.map((item) => (

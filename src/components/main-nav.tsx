@@ -16,7 +16,7 @@ import clsx from "clsx";
 const navItems = [
   { href: "/", label: "Prehled", icon: LayoutDashboard },
   { href: "/news", label: "Clanky", icon: Newspaper },
-  { href: "/digests", label: "Digesty", icon: FileText },
+  { href: "/digests", label: "Souhrny", icon: FileText },
   { href: "/ai", label: "AI shrnuti", icon: Bot },
   { href: "/tools", label: "Nastroje", icon: Wrench },
   { href: "/sources", label: "Zdroje", icon: Database },

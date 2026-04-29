@@ -14,7 +14,10 @@ export function NewsListItem({ item }: { item: NewsItem }) {
         <div className="w-fit rounded-lg bg-[#eef6f1] px-3 py-2 text-lg font-semibold text-[#145238]">
           {item.score}
         </div>
-        <p className="text-xs font-medium text-[#68716c] lg:mt-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#68716c] lg:mt-2">
+          relevance
+        </p>
+        <p className="text-xs font-medium text-[#68716c]">
           {scoreLabel(item.score)}
         </p>
       </div>

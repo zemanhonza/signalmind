@@ -20,7 +20,7 @@ const statusOptions: Array<{ value: NewsStatus | "all"; label: string }> = [
 
 const sortOptions = [
   { value: "newest", label: "Nejnovejsi" },
-  { value: "score", label: "Nejvyssi signal" },
+  { value: "score", label: "Nejvyssi relevance" },
 ];
 
 function firstParam(value: string | string[] | undefined) {
@@ -100,7 +100,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
     <section className="grid gap-5">
       <SectionHeading
         eyebrow="Archiv"
-        title="Clanky a signaly"
+        title="Clanky a relevance"
         action={
           <Link
             href="/ai"

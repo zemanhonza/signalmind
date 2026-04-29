@@ -112,7 +112,7 @@ Vrat pouze validni JSON bez Markdownu a bez komentare ve tvaru:
 }
 
 Skore 90-100 znamena zasadni primarni informace nebo velmi silny prakticky dopad.
-Skore 75-89 znamena dulezity signal pro sledovani.
+Skore 75-89 znamena vysokou relevanci pro sledovani.
 Skore 50-74 znamena uzitecny, ale mene zasadni prispevek.
 Skore pod 50 znamena nizkou prioritu.
 

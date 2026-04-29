@@ -29,11 +29,16 @@ export function NewsCard({ item }: { item: NewsItem }) {
             </span>
           ) : null}
         </div>
-        <div className="flex items-center gap-2 text-sm font-semibold text-[#145238]">
-          <span>{item.score}</span>
-          <span className="text-xs font-medium text-[#68716c]">
-            {scoreLabel(item.score)}
-          </span>
+        <div className="rounded-lg bg-[#eef6f1] px-3 py-2 text-right">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#68716c]">
+            Relevance
+          </p>
+          <div className="mt-1 flex items-baseline justify-end gap-2 text-[#145238]">
+            <span className="text-lg font-semibold">{item.score}</span>
+            <span className="text-xs font-medium text-[#68716c]">
+              {scoreLabel(item.score)}
+            </span>
+          </div>
         </div>
       </div>
 

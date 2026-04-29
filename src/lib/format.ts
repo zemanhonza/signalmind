@@ -1,6 +1,6 @@
 export function scoreLabel(score: number) {
-  if (score >= 90) return "vysoky signal";
-  if (score >= 80) return "silny signal";
+  if (score >= 90) return "vysoka priorita";
+  if (score >= 80) return "silna relevance";
   if (score >= 70) return "sledovat";
   return "nizsi priorita";
 }

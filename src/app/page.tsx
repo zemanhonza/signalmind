@@ -56,9 +56,9 @@ export default async function Home() {
           href="/tools"
         />
         <MetricCard
-          label="Prioritni signal"
+          label="Nejvyssi relevance"
           value={String(topScore)}
-          detail="Skore bude postupne doplnovat AI zpracovani a kuratorska pravidla."
+          detail="Skore relevance kombinuje duveryhodnost zdroje, tema, novost a prakticky dopad."
           icon={Sparkles}
           accent="bg-[#fff0bd] text-[#684900]"
           href="/ai"
@@ -70,7 +70,7 @@ export default async function Home() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#68716c]">
-                Dnesni digest
+                Dnesni souhrn
               </p>
               <h2 className="mt-2 text-2xl font-semibold text-[#1d211f]">
                 {topDigest.title}
@@ -131,8 +131,8 @@ export default async function Home() {
 
       <section>
         <SectionHeading
-          eyebrow="Kuratorovany proud"
-          title="Nejdulezitejsi signaly"
+          eyebrow="Prioritizovany proud"
+          title="Nejdulezitejsi clanky"
           action={
             <div className="flex flex-wrap gap-2">
               <Link

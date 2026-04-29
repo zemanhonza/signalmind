@@ -31,7 +31,7 @@ Useful scripts:
 - `npm run ai:process -- --limit=5` summarizes and scores new items with Anthropic.
 - `npm run ai:process -- --status=summarized --limit=3` refreshes already summarized items.
 - `npm run embeddings:process -- --limit=10` stores pgvector embeddings for summarized items.
-- `npm run digest:generate -- --limit=12` creates or updates the daily digest.
+- `npm run summary:generate -- --limit=12` creates or updates the daily summary.
 - `npm run seed:tools` fills the Supabase tool catalog with curated AI tools.
 
 ## Configuration

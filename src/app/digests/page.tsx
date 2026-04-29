@@ -8,7 +8,7 @@ export default async function DigestsPage() {
 
   return (
     <section>
-      <SectionHeading eyebrow="Archiv" title="Denni digesty" />
+      <SectionHeading eyebrow="Archiv" title="Denni souhrny" />
       <div className="grid gap-4">
         {digests.map((digest) => (
           <article

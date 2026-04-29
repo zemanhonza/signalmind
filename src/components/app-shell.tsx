@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 Osobni prehled AI novinek
               </p>
               <h1 className="mt-1 text-2xl font-semibold tracking-normal text-[#1d211f]">
-                Vyber signalu z umele inteligence
+                Vyber relevantnich AI novinek
               </h1>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">

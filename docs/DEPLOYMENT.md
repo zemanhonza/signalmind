@@ -82,9 +82,9 @@ Suggested first run:
 
 - `ai_limit=25`
 - `embedding_limit=50`
-- `digest_limit=12`
+- `summary_limit=12`
 
-This workflow summarizes queued items, embeds summarized items, and regenerates the daily digest.
+This workflow summarizes queued items, embeds summarized items, and regenerates the daily summary.
 
 ## Related Articles
 

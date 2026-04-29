@@ -64,6 +64,9 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
           <div className="w-fit rounded-lg bg-[#eef6f1] px-4 py-3 text-[#145238]">
             <p className="text-3xl font-semibold">{item.score}</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#68716c]">
+              relevance
+            </p>
             <p className="mt-1 text-xs font-semibold">{scoreLabel(item.score)}</p>
           </div>
         </div>

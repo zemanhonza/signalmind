@@ -32,7 +32,7 @@ export function ToolCard({ tool }: { tool: ToolItem }) {
       <p className="mt-3 text-sm leading-6 text-[#40524b]">{tool.useCase}</p>
       <div className="mt-4 flex items-center justify-between">
         <span className="text-sm font-semibold text-[#145238]">
-          signal {tool.signal}
+          relevance {tool.signal}
         </span>
         <a
           href={tool.url}

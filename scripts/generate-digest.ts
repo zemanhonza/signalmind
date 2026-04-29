@@ -3,7 +3,7 @@ import "./load-env";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
-const DigestSchema = z.object({
+const DailySummarySchema = z.object({
   title_cs: z.string().min(8).max(120),
   focus_cs: z.string().min(8).max(140),
   body_lines_cs: z.array(z.string().min(10).max(260)).min(4).max(8),
@@ -123,11 +123,11 @@ function buildPrompt(items: ItemRow[]) {
   });
 
   return `
-Vytvor cesky denni digest pro Signalmind z techto AI novinek.
+Vytvor cesky denni souhrn pro Signalmind z techto AI novinek.
 
 Vrat pouze validni JSON bez Markdownu ve tvaru:
 {
-  "title_cs": "kratky titulek digestu",
+  "title_cs": "kratky titulek denniho souhrnu",
   "focus_cs": "3-6 klicovych slov nebo temat",
   "body_lines_cs": [
     "kratky bod s tematem a jasnym dopadem",
@@ -164,7 +164,7 @@ async function generateDigest(items: ItemRow[]) {
       max_tokens: 700,
       temperature: 0.2,
       system:
-        "Jsi editor ceskeho AI digestu. Vracis pouze validni JSON podle zadaneho schematu.",
+        "Jsi editor ceskeho AI souhrnu. Vracis pouze validni JSON podle zadaneho schematu.",
       messages: [{ role: "user", content: buildPrompt(items) }],
     }),
   }).finally(() => clearTimeout(timeout));
@@ -178,16 +178,16 @@ async function generateDigest(items: ItemRow[]) {
   const text = json.content.find((block) => block.type === "text")?.text;
   if (!text) throw new Error("Claude response did not contain text.");
 
-  return DigestSchema.parse(extractJson(text));
+  return DailySummarySchema.parse(extractJson(text));
 }
 
 async function main() {
   const digestDate = pragueDate();
   const items = await loadItems();
-  console.log(`Loaded ${items.length} summarized items for digest ${digestDate}.`);
+  console.log(`Loaded ${items.length} summarized items for daily summary ${digestDate}.`);
 
   if (items.length === 0) {
-    console.log("No summarized items available; skipping digest.");
+    console.log("No summarized items available; skipping daily summary.");
     return;
   }
 
@@ -204,7 +204,7 @@ async function main() {
 
   if (error) throw error;
 
-  console.log(`Generated digest for ${digestDate}: ${digest.title_cs}`);
+  console.log(`Generated daily summary for ${digestDate}: ${digest.title_cs}`);
 }
 
 main().catch((error) => {
