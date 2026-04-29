@@ -47,7 +47,8 @@ type AnthropicResponse = {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const anthropicKey = process.env.ANTHROPIC_API_KEY;
-const model = process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5-20251001";
+const model =
+  process.env.ANTHROPIC_MODEL?.trim() || "claude-haiku-4-5-20251001";
 
 if (!supabaseUrl || !serviceRoleKey || !anthropicKey) {
   throw new Error(
@@ -59,6 +60,11 @@ const anthropicApiKey = anthropicKey;
 
 const limitArg = process.argv.find((arg) => arg.startsWith("--limit="));
 const itemLimit = limitArg ? Number(limitArg.split("=")[1]) : 5;
+const configuredTimeoutMs = Number(process.env.AI_REQUEST_TIMEOUT_MS);
+const requestTimeoutMs =
+  Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0
+    ? configuredTimeoutMs
+    : 45000;
 
 const supabase = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
@@ -131,8 +137,12 @@ async function loadItems() {
 }
 
 async function summarizeWithClaude(item: ItemRow) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), requestTimeoutMs);
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
+    signal: controller.signal,
     headers: {
       "content-type": "application/json",
       "x-api-key": anthropicApiKey,
@@ -151,7 +161,7 @@ async function summarizeWithClaude(item: ItemRow) {
         },
       ],
     }),
-  });
+  }).finally(() => clearTimeout(timeout));
 
   if (!response.ok) {
     const body = await response.text();

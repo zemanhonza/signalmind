@@ -22,8 +22,9 @@ Optional variables:
 `Settings` -> `Secrets and variables` -> `Actions` -> `Variables`
 
 - `ANTHROPIC_MODEL`: defaults to `claude-haiku-4-5-20251001` in the script
-- `RSS_LIMIT`: default workflow value is `15`
-- `AI_LIMIT`: default workflow value is `8`
+- `RSS_LIMIT`: default workflow value is `10`
+- `AI_LIMIT`: default workflow value is `5`
+- `AI_REQUEST_TIMEOUT_MS`: default script value is `45000`
 
 ## Daily Automation
 
@@ -34,6 +35,8 @@ It runs every day at `05:30 UTC`, which is `07:30` in Prague during summer time 
 You can also run it manually:
 
 `Actions` -> `Daily Signalmind Update` -> `Run workflow`
+
+For a first manual run, use small limits such as `rss_limit=5` and `ai_limit=3`. Larger backfills can be run later once the workflow is stable.
 
 ## Vercel
 

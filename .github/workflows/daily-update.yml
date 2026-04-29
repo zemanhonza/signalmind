@@ -6,11 +6,11 @@ on:
       rss_limit:
         description: Number of RSS sources to ingest
         required: false
-        default: "15"
+        default: "10"
       ai_limit:
         description: Number of new items to summarize and score
         required: false
-        default: "8"
+        default: "5"
   schedule:
     # 05:30 UTC is 07:30 in Prague during summer time and 06:30 during winter time.
     - cron: "30 5 * * *"
@@ -23,7 +23,7 @@ jobs:
   update:
     name: Ingest and process AI news
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
 
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -33,38 +33,45 @@ jobs:
       ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
       DEFAULT_RSS_LIMIT: ${{ vars.RSS_LIMIT }}
       DEFAULT_AI_LIMIT: ${{ vars.AI_LIMIT }}
+      AI_REQUEST_TIMEOUT_MS: ${{ vars.AI_REQUEST_TIMEOUT_MS }}
       DISABLE_TELEMETRY: 1
       NEXT_TELEMETRY_DISABLED: 1
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24"
           cache: npm
 
       - name: Install dependencies
+        timeout-minutes: 5
         run: npm ci
 
       - name: Typecheck
+        timeout-minutes: 3
         run: npm run typecheck
 
       - name: Lint
+        timeout-minutes: 3
         run: npm run lint
 
       - name: RSS ingest
+        timeout-minutes: 8
         shell: bash
         run: |
           RSS_LIMIT="${{ inputs.rss_limit }}"
-          RSS_LIMIT="${RSS_LIMIT:-${DEFAULT_RSS_LIMIT:-15}}"
+          RSS_LIMIT="${RSS_LIMIT:-${DEFAULT_RSS_LIMIT:-10}}"
           npm run ingest:rss -- --limit="$RSS_LIMIT"
 
       - name: AI summarize and score
+        timeout-minutes: 18
         shell: bash
         run: |
           AI_LIMIT="${{ inputs.ai_limit }}"
-          AI_LIMIT="${AI_LIMIT:-${DEFAULT_AI_LIMIT:-8}}"
+          AI_LIMIT="${AI_LIMIT:-${DEFAULT_AI_LIMIT:-5}}"
           npm run ai:process -- --limit="$AI_LIMIT"

@@ -52,7 +52,8 @@ Current automation:
 
 - `.github/workflows/daily-update.yml`
 - Daily schedule: `05:30 UTC`
-- Defaults: `RSS_LIMIT=15`, `AI_LIMIT=8`
+- Defaults: `RSS_LIMIT=10`, `AI_LIMIT=5`
+- Anthropic request timeout: `AI_REQUEST_TIMEOUT_MS=45000`
 
 ## Initial Source Groups
 
