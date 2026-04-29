@@ -103,3 +103,8 @@ jobs:
           EMBEDDING_LIMIT="${{ inputs.embedding_limit }}"
           EMBEDDING_LIMIT="${EMBEDDING_LIMIT:-${DEFAULT_EMBEDDING_LIMIT:-10}}"
           npm run embeddings:process -- --limit="$EMBEDDING_LIMIT"
+
+      - name: Daily digest
+        timeout-minutes: 8
+        shell: bash
+        run: npm run digest:generate -- --limit=12

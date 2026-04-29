@@ -1,0 +1,88 @@
+name: Signalmind Backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      ai_limit:
+        description: Number of queued items to summarize and score
+        required: false
+        default: "25"
+      embedding_limit:
+        description: Number of summarized items to embed
+        required: false
+        default: "50"
+      digest_limit:
+        description: Number of top summarized items to use for digest
+        required: false
+        default: "12"
+
+concurrency:
+  group: signalmind-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    name: Backfill AI summaries and embeddings
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+      EMBEDDING_MODEL: ${{ vars.EMBEDDING_MODEL }}
+      AI_REQUEST_TIMEOUT_MS: ${{ vars.AI_REQUEST_TIMEOUT_MS }}
+      EMBEDDING_REQUEST_TIMEOUT_MS: ${{ vars.EMBEDDING_REQUEST_TIMEOUT_MS }}
+      DISABLE_TELEMETRY: 1
+      NEXT_TELEMETRY_DISABLED: 1
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        timeout-minutes: 5
+        run: npm ci
+
+      - name: Typecheck
+        timeout-minutes: 3
+        run: npm run typecheck
+
+      - name: Lint
+        timeout-minutes: 3
+        run: npm run lint
+
+      - name: AI summarize and score backlog
+        timeout-minutes: 35
+        shell: bash
+        run: |
+          AI_LIMIT="${{ inputs.ai_limit }}"
+          npm run ai:process -- --limit="${AI_LIMIT:-25}"
+
+      - name: Vector embeddings backlog
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "OPENAI_API_KEY is not configured; skipping embeddings."
+            exit 0
+          fi
+          EMBEDDING_LIMIT="${{ inputs.embedding_limit }}"
+          npm run embeddings:process -- --limit="${EMBEDDING_LIMIT:-50}"
+
+      - name: Generate daily digest
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          DIGEST_LIMIT="${{ inputs.digest_limit }}"
+          npm run digest:generate -- --limit="${DIGEST_LIMIT:-12}"

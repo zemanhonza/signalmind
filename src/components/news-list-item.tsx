@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
 import { scoreLabel } from "@/lib/format";
@@ -38,9 +39,9 @@ export function NewsListItem({ item }: { item: NewsItem }) {
         </div>
 
         <h3 className="mt-2 max-w-4xl text-base font-semibold leading-6 text-[#1d211f]">
-          <a href={articleUrl} target="_blank" rel="noreferrer" className="hover:underline">
+          <Link href={`/news/${item.id}`} className="hover:underline">
             {item.title}
-          </a>
+          </Link>
         </h3>
         <p className="mt-2 max-w-4xl text-sm leading-6 text-[#4f5d55]">
           {item.summary}
@@ -64,13 +65,19 @@ export function NewsListItem({ item }: { item: NewsItem }) {
 
       <div className="flex items-center justify-between gap-3 lg:justify-end">
         <span className="text-xs text-[#68716c]">{item.readTime}</span>
+        <Link
+          href={`/news/${item.id}`}
+          className="rounded-lg border border-[#dfe4dd] px-3 py-2 text-sm font-semibold text-[#0d6b57] hover:bg-[#f2f7f4]"
+        >
+          Detail
+        </Link>
         <a
           href={articleUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-lg border border-[#dfe4dd] px-3 py-2 text-sm font-semibold text-[#0d6b57] hover:bg-[#f2f7f4]"
         >
-          Otevrit
+          Zdroj
           <ExternalLink size={15} />
         </a>
       </div>

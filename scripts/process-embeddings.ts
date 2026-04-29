@@ -118,6 +118,11 @@ async function withoutExistingChunks(items: ItemRow[]) {
 }
 
 async function main() {
+  if (!Number.isFinite(itemLimit) || itemLimit <= 0) {
+    console.log("Embedding limit is 0; skipping.");
+    return;
+  }
+
   const loaded = await loadItems();
   const items = await withoutExistingChunks(loaded);
 

@@ -74,6 +74,22 @@ npm run embeddings:process -- --limit=20
 
 The daily GitHub workflow also runs this step after AI summarization when `OPENAI_API_KEY` is configured.
 
+## Backfill
+
+Use `Actions` -> `Signalmind Backfill` for larger backlog processing without running RSS ingest.
+
+Suggested first run:
+
+- `ai_limit=25`
+- `embedding_limit=50`
+- `digest_limit=12`
+
+This workflow summarizes queued items, embeds summarized items, and regenerates the daily digest.
+
+## Related Articles
+
+Run `supabase/migrations/0004_related_items.sql` in Supabase SQL editor to enable vector-based related articles on article detail pages. Until that migration is applied, the app falls back to topic and score based related articles.
+
 After the first deploy, Vercel will show a production URL. If the project name is available, it is usually:
 
 `https://signalmind.vercel.app`

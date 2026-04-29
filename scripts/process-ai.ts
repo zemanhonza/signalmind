@@ -252,6 +252,11 @@ async function processItem(item: ItemRow) {
 }
 
 async function main() {
+  if (!Number.isFinite(itemLimit) || itemLimit <= 0) {
+    console.log("AI processing limit is 0; skipping.");
+    return;
+  }
+
   const items = await loadItems();
   console.log(`Loaded ${items.length} ${itemStatus} items for AI processing.`);
 

@@ -9,6 +9,7 @@ import {
 import { createEmbedding, hasEmbeddingApiKey } from "./embeddings";
 import type {
   Digest,
+  NewsDetail,
   NewsItem,
   NewsStatus,
   Source,
@@ -287,6 +288,36 @@ function newsFromRow(row: ItemRow): NewsItem {
     tags: summary?.key_points_cs?.slice(0, 3) ?? [row.status],
     readTime: estimateReadTime(summaryText),
     status: normalizeNewsStatus(row.status),
+  };
+}
+
+function newsDetailFromRow(row: ItemRow): NewsDetail {
+  const summary = latestSummary(row.item_summaries);
+  const summaryShort =
+    summary?.summary_short_cs ??
+    "Ceka na ceske AI shrnuti. Polozka je uz ulozena v archivu a bude zpracovana v dalsi davce.";
+  const summaryLong = summary?.summary_long_cs ?? summaryShort;
+  const whyItMatters =
+    summary?.why_it_matters_cs ??
+    "Dulezitost doplni AI zpracovani po vyhodnoceni zdroje, tematu a praktickeho dopadu.";
+
+  return {
+    id: row.id,
+    title: summary?.title_cs ?? row.title,
+    originalTitle: row.title,
+    url: row.canonical_url,
+    source: row.sources?.name ?? "Neznamy zdroj",
+    sourceUrl: row.sources?.homepage_url ?? row.canonical_url,
+    publishedAt: formatDate(row.published_at),
+    topic: normalizeTopic(row.topic),
+    score: row.score ?? 0,
+    summary: summaryShort,
+    longSummary: summaryLong,
+    whyItMatters,
+    tags: summary?.key_points_cs?.slice(0, 5) ?? [row.status],
+    readTime: estimateReadTime([summaryLong, row.raw_excerpt ?? ""].join(" ")),
+    status: normalizeNewsStatus(row.status),
+    rawExcerpt: row.raw_excerpt ?? undefined,
   };
 }
 
@@ -580,6 +611,119 @@ export async function getSearchResults(query: string, limit = 10): Promise<NewsA
     const message = error instanceof Error ? error.message : String(error);
     return fallback(`Semantic search spadl na chybe, pouzivam textove hledani: ${message}`);
   }
+}
+
+export async function getNewsItem(id: string): Promise<NewsDetail | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    const demo = demoNewsItems.find((item) => item.id === id);
+    return demo
+      ? {
+          ...demo,
+          originalTitle: demo.title,
+          longSummary: demo.summary,
+        }
+      : null;
+  }
+
+  const queryWithTitle = await supabase
+    .from("items")
+    .select(itemSelectWithTitle)
+    .eq("id", id)
+    .neq("status", "hidden")
+    .maybeSingle();
+  let data: unknown = queryWithTitle.data;
+  let error = queryWithTitle.error;
+
+  if (error?.message.includes("title_cs")) {
+    const legacy = await supabase
+      .from("items")
+      .select(itemSelectLegacy)
+      .eq("id", id)
+      .neq("status", "hidden")
+      .maybeSingle();
+    data = legacy.data;
+    error = legacy.error;
+  }
+
+  if (error || !data) return null;
+  return newsDetailFromRow(data as ItemRow);
+}
+
+export async function getRelatedNews(itemId: string, limit = 6): Promise<NewsItem[]> {
+  const supabase = getSupabaseClient();
+  const current = await getNewsItem(itemId);
+  if (!supabase || !current) {
+    return demoNewsItems
+      .filter((item) => item.id !== itemId && item.topic === current?.topic)
+      .slice(0, limit);
+  }
+
+  const fallback = async () => {
+    const { data, error } = await supabase
+      .from("items")
+      .select(itemSelectWithTitle)
+      .eq("status", "summarized")
+      .eq("topic", current.topic)
+      .neq("id", itemId)
+      .order("score", { ascending: false })
+      .order("published_at", { ascending: false })
+      .limit(limit);
+
+    if (error || !data) return [];
+    return (data as unknown as ItemRow[]).map(newsFromRow);
+  };
+
+  const { data, error } = await supabase.rpc("match_related_item_chunks", {
+    source_item_id: itemId,
+    match_count: limit * 2,
+  });
+
+  if (error || !data || data.length === 0) {
+    return fallback();
+  }
+
+  const matches = (data as ChunkMatchRow[]).filter((match) => match.item_id !== itemId);
+  const orderedIds = [...new Set(matches.map((match) => match.item_id))].slice(0, limit);
+  if (orderedIds.length === 0) return fallback();
+
+  const queryWithTitle = await supabase
+    .from("items")
+    .select(itemSelectWithTitle)
+    .in("id", orderedIds);
+  let itemData: unknown = queryWithTitle.data;
+  let itemError = queryWithTitle.error;
+
+  if (itemError?.message.includes("title_cs")) {
+    const legacy = await supabase
+      .from("items")
+      .select(itemSelectLegacy)
+      .in("id", orderedIds);
+    itemData = legacy.data;
+    itemError = legacy.error;
+  }
+
+  if (itemError || !itemData) return fallback();
+
+  const rowsById = new Map(
+    (itemData as unknown as ItemRow[]).map((row) => [row.id, row]),
+  );
+  const matchById = new Map(matches.map((match) => [match.item_id, match]));
+
+  const related: NewsItem[] = [];
+  for (const id of orderedIds) {
+    const row = rowsById.get(id);
+    const match = matchById.get(id);
+    if (!row) continue;
+
+    related.push({
+      ...newsFromRow(row),
+      similarity: match?.similarity,
+      semanticSnippet: match ? excerptAroundQuery(match.content, current.title) : undefined,
+    });
+  }
+
+  return related;
 }
 
 export async function getItemCounts(): Promise<ItemCounts> {

@@ -158,6 +158,11 @@ async function ingestSource(source: SourceRow) {
 }
 
 async function main() {
+  if (!Number.isFinite(sourceLimit) || sourceLimit <= 0) {
+    console.log("RSS source limit is 0; skipping.");
+    return;
+  }
+
   const startedAt = Date.now();
   const sources = await loadSources();
   console.log(

@@ -42,6 +42,12 @@ export type NewsItem = {
   semanticSnippet?: string;
 };
 
+export type NewsDetail = NewsItem & {
+  originalTitle: string;
+  longSummary: string;
+  rawExcerpt?: string;
+};
+
 export type ToolItem = {
   id: string;
   name: string;

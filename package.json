@@ -11,6 +11,7 @@
     "ingest:rss": "tsx scripts/ingest-rss.ts",
     "ai:process": "tsx scripts/process-ai.ts",
     "embeddings:process": "tsx scripts/process-embeddings.ts",
+    "digest:generate": "tsx scripts/generate-digest.ts",
     "seed:tools": "tsx scripts/seed-tools.ts"
   },
   "dependencies": {
