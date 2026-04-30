@@ -42,3 +42,36 @@ npm run tools:import-csv -- --file=./exports/tools.csv --default-score=70
 
 Pokud CSV neobsahuje popis nebo use-case, skript doplni neutralni cesky text,
 ktery je mozne pozdeji upravit nebo obohatit AI zpracovanim.
+
+## Import VUT katalogu rizik
+
+VUT verejne publikuje katalog AI nastroju s rizikovou klasifikaci, stavem vuci
+EU/CR pozadavkum, doporucenym rozhodnutim a podminkami pouziti.
+
+Nejdriv je potreba v Supabase SQL editoru spustit migraci:
+
+```sql
+-- supabase/migrations/0005_tool_risk_fields.sql
+```
+
+Potom je mozne import overit:
+
+```bash
+npm run tools:import-vut -- --dry-run
+```
+
+A spustit ostry import:
+
+```bash
+npm run tools:import-vut
+```
+
+Volitelne je mozne import omezit:
+
+```bash
+npm run tools:import-vut -- --limit=25
+```
+
+Import dela upsert podle `homepage_url`. Kdyz uz v katalogu existuje nastroj se
+stejnym nazvem, importer se pokusi pouzit jeho existujici URL a doplnit k nemu
+rizikova metadata, aby nevznikaly zbytecne duplicity.

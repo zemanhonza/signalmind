@@ -66,6 +66,21 @@ type ToolRow = {
   summary_cs: string | null;
   use_case_cs: string | null;
   signal_score: number;
+  tool_type?: string | null;
+  typical_data?: string | null;
+  risk_level?: string | null;
+  data_residency?: string | null;
+  compliance_status?: string | null;
+  recommended_decision?: string | null;
+  ai_act_note_cs?: string | null;
+  legal_security_note_cs?: string | null;
+  risk_conditions_cs?: string | null;
+  risk_rationale_cs?: string | null;
+  risk_guarantor?: string | null;
+  risk_source_name?: string | null;
+  risk_source_url?: string | null;
+  risk_checked_at?: string | null;
+  risk_updated_at?: string | null;
 };
 
 type DigestRow = {
@@ -109,6 +124,8 @@ export type ToolFilters = {
   query?: string;
   category?: string;
   pricing?: ToolItem["pricing"] | "all";
+  risk?: string;
+  decision?: string;
   limit?: number;
 };
 
@@ -139,6 +156,10 @@ const itemSelectWithTitle =
   "id, title, canonical_url, published_at, topic, score, raw_excerpt, status, sources(name, homepage_url), item_summaries(title_cs, summary_short_cs, summary_long_cs, why_it_matters_cs, key_points_cs, created_at)";
 const itemSelectLegacy =
   "id, title, canonical_url, published_at, topic, score, raw_excerpt, status, sources(name, homepage_url), item_summaries(summary_short_cs, summary_long_cs, why_it_matters_cs, key_points_cs, created_at)";
+const toolSelectWithRisk =
+  "id, name, homepage_url, category, pricing, summary_cs, use_case_cs, signal_score, tool_type, typical_data, risk_level, data_residency, compliance_status, recommended_decision, ai_act_note_cs, legal_security_note_cs, risk_conditions_cs, risk_rationale_cs, risk_guarantor, risk_source_name, risk_source_url, risk_checked_at, risk_updated_at";
+const toolSelectLegacy =
+  "id, name, homepage_url, category, pricing, summary_cs, use_case_cs, signal_score";
 
 function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -337,6 +358,21 @@ function toolFromRow(row: ToolRow): ToolItem {
     summary: row.summary_cs ?? "Zatim bez popisu.",
     useCase: row.use_case_cs ?? "Use-case bude doplnen po kuraci.",
     signal: row.signal_score,
+    toolType: row.tool_type ?? undefined,
+    typicalData: row.typical_data ?? undefined,
+    riskLevel: row.risk_level ?? undefined,
+    dataResidency: row.data_residency ?? undefined,
+    complianceStatus: row.compliance_status ?? undefined,
+    recommendedDecision: row.recommended_decision ?? undefined,
+    aiActNote: row.ai_act_note_cs ?? undefined,
+    legalSecurityNote: row.legal_security_note_cs ?? undefined,
+    riskConditions: row.risk_conditions_cs ?? undefined,
+    riskRationale: row.risk_rationale_cs ?? undefined,
+    riskGuarantor: row.risk_guarantor ?? undefined,
+    riskSourceName: row.risk_source_name ?? undefined,
+    riskSourceUrl: row.risk_source_url ?? undefined,
+    riskCheckedAt: row.risk_checked_at ? formatDate(row.risk_checked_at) : undefined,
+    riskUpdatedAt: row.risk_updated_at ? formatDate(row.risk_updated_at) : undefined,
   };
 }
 
@@ -771,6 +807,18 @@ function filterTools(items: ToolItem[], filters: ToolFilters) {
       return false;
     }
 
+    if (filters.risk && filters.risk !== "all" && tool.riskLevel !== filters.risk) {
+      return false;
+    }
+
+    if (
+      filters.decision &&
+      filters.decision !== "all" &&
+      tool.recommendedDecision !== filters.decision
+    ) {
+      return false;
+    }
+
     if (query && !includesQuery(tool, query)) return false;
 
     return true;
@@ -781,12 +829,22 @@ export async function getTools(filters: ToolFilters = {}) {
   const supabase = getSupabaseClient();
   if (!supabase) return filterTools(demoTools, filters).slice(0, filters.limit);
 
-  const { data, error } = await supabase
+  const riskQuery = await supabase
     .from("tools")
-    .select("id, name, homepage_url, category, pricing, summary_cs, use_case_cs, signal_score")
+    .select(toolSelectWithRisk)
     .order("signal_score", { ascending: false });
+  const legacyQuery =
+    riskQuery.error && riskQuery.error.message.includes("risk_level")
+      ? await supabase
+          .from("tools")
+          .select(toolSelectLegacy)
+          .order("signal_score", { ascending: false })
+      : riskQuery;
 
-  const rows = error || !data || data.length === 0 ? demoTools : (data as ToolRow[]).map(toolFromRow);
+  const rows =
+    legacyQuery.error || !legacyQuery.data || legacyQuery.data.length === 0
+      ? demoTools
+      : (legacyQuery.data as ToolRow[]).map(toolFromRow);
   return filterTools(rows, filters).slice(0, filters.limit);
 }
 

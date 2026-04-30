@@ -57,6 +57,21 @@ export type ToolItem = {
   summary: string;
   useCase: string;
   signal: number;
+  toolType?: string;
+  typicalData?: string;
+  riskLevel?: string;
+  dataResidency?: string;
+  complianceStatus?: string;
+  recommendedDecision?: string;
+  aiActNote?: string;
+  legalSecurityNote?: string;
+  riskConditions?: string;
+  riskRationale?: string;
+  riskGuarantor?: string;
+  riskSourceName?: string;
+  riskSourceUrl?: string;
+  riskCheckedAt?: string;
+  riskUpdatedAt?: string;
 };
 
 export type Digest = {

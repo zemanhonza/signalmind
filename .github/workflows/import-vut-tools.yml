@@ -1,0 +1,60 @@
+name: Import VUT AI tools
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Run without writing to Supabase
+        required: false
+        default: "false"
+      limit:
+        description: Optional import limit
+        required: false
+        default: ""
+  schedule:
+    # Monthly refresh of the public VUT AI tool risk catalog.
+    - cron: "15 6 1 * *"
+
+concurrency:
+  group: import-vut-tools
+  cancel-in-progress: false
+
+jobs:
+  import:
+    name: Import VUT risk catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DISABLE_TELEMETRY: 1
+      NEXT_TELEMETRY_DISABLED: 1
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Import VUT tools
+        shell: bash
+        run: |
+          args=()
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          if [ -n "${{ inputs.limit }}" ]; then
+            args+=(--limit="${{ inputs.limit }}")
+          fi
+          npm run tools:import-vut -- "${args[@]}"

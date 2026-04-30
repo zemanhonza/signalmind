@@ -66,13 +66,27 @@ export default async function ToolsPage({ searchParams }: PageProps) {
   const q = firstParam(params.q) ?? "";
   const category = firstParam(params.category) ?? "all";
   const pricing = (firstParam(params.pricing) ?? "all") as ToolItem["pricing"] | "all";
+  const risk = firstParam(params.risk) ?? "all";
+  const decision = firstParam(params.decision) ?? "all";
   const allTools = await getTools();
-  const tools = await getTools({ query: q, category, pricing });
+  const tools = await getTools({ query: q, category, pricing, risk, decision });
   const categories = Array.from(new Set(allTools.map((tool) => tool.category))).sort();
+  const risks = Array.from(
+    new Set(allTools.map((tool) => tool.riskLevel).filter((value): value is string => Boolean(value))),
+  ).sort();
+  const decisions = Array.from(
+    new Set(
+      allTools
+        .map((tool) => tool.recommendedDecision)
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ).sort();
   const currentParams = {
     q: q || undefined,
     category,
     pricing,
+    risk,
+    decision,
   };
 
   return (
@@ -92,6 +106,8 @@ export default async function ToolsPage({ searchParams }: PageProps) {
           </label>
           <input type="hidden" name="category" value={category} />
           <input type="hidden" name="pricing" value={pricing} />
+          <input type="hidden" name="risk" value={risk} />
+          <input type="hidden" name="decision" value={decision} />
           <button className="rounded-lg bg-[#145238] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0f3f2b]">
             Hledat
           </button>
@@ -128,6 +144,42 @@ export default async function ToolsPage({ searchParams }: PageProps) {
             />
           ))}
         </div>
+
+        {risks.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <FilterLink
+              active={risk === "all"}
+              href={buildHref(currentParams, { risk: "all" })}
+              label="Vsechna rizika"
+            />
+            {risks.map((option) => (
+              <FilterLink
+                key={option}
+                active={risk === option}
+                href={buildHref(currentParams, { risk: option })}
+                label={`Riziko: ${option}`}
+              />
+            ))}
+          </div>
+        )}
+
+        {decisions.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <FilterLink
+              active={decision === "all"}
+              href={buildHref(currentParams, { decision: "all" })}
+              label="Vsechna doporuceni"
+            />
+            {decisions.map((option) => (
+              <FilterLink
+                key={option}
+                active={decision === option}
+                href={buildHref(currentParams, { decision: option })}
+                label={option}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <p className="text-sm text-[#65716b]">

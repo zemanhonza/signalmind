@@ -34,6 +34,8 @@ Useful scripts:
 - `npm run summary:generate -- --limit=12` creates or updates the daily summary.
 - `npm run seed:tools` fills the Supabase tool catalog with curated AI tools.
 - `npm run tools:import-csv -- --file=./exports/tools.csv` imports an external CSV tool list.
+- `npm run tools:import-vut -- --dry-run` checks the public VUT AI risk catalog import.
+- `npm run tools:import-vut` imports or updates tools from the public VUT AI risk catalog.
 
 Tool imports are documented in `docs/TOOL_IMPORT.md`.
 
@@ -45,6 +47,7 @@ The initial database schema is in `supabase/migrations/0001_initial_schema.sql`.
 The initial curated source list is in `supabase/seed_sources.sql`.
 Vector search updates are in `supabase/migrations/0003_vector_search.sql`.
 Related-article search updates are in `supabase/migrations/0004_related_items.sql`.
+Tool risk catalog fields are in `supabase/migrations/0005_tool_risk_fields.sql`.
 
 ## Plan
 
